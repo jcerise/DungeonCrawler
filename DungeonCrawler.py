@@ -36,6 +36,9 @@ libtcod.console_set_custom_font('fonts/arial10x10.png', libtcod.FONT_TYPE_GRAYSC
 #Initialize the console window, set its size, title, and tell it to not go fullscreen
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DungeonCrawler', False)
 
+#Set up a off-screen console to act as a drawing buffer
+con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 #libtcod.sys_set_fps(LIMIT_FPS)
 
@@ -44,12 +47,13 @@ player_y = SCREEN_HEIGHT / 2
 
 while not libtcod.console_is_window_closed():
     #Set the foreground (text color) of console 1 (our main window) to white
-    libtcod.console_set_default_foreground(0, libtcod.white)
-    libtcod.console_put_char(0, player_x, player_y, '@', libtcod.BKGND_NONE)
+    libtcod.console_set_default_foreground(con, libtcod.white)
+    libtcod.console_put_char(con, player_x, player_y, '@', libtcod.BKGND_NONE)
+    libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
     libtcod.console_flush()
 
     #Stop character trails by placing a space where the player is. If they don't move, their icon will overwrite this
-    libtcod.console_put_char(0, player_x, player_y, ' ', libtcod.BKGND_NONE)
+    libtcod.console_put_char(con, player_x, player_y, ' ', libtcod.BKGND_NONE)
 
     #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
     #we process the key press accordingly
