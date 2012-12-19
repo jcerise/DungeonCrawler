@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+from gameObject import Object
 
 #Set the size of our window
 SCREEN_WIDTH = 80
@@ -22,13 +23,13 @@ def handle_keys():
 
     #Handle movement keys
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        player_y -= 1
+        player.move(0, -1)
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        player_y += 1
+        player.move(0, 1)
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        player_x += 1
+        player.move(1, 0)
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        player_x -= 1
+        player.move(-1, 0)
 
 #Tell the engine which font to use, and what type of font it is
 libtcod.console_set_custom_font('fonts/arial10x10.png', libtcod.FONT_TYPE_GRAYSCALE | libtcod.FONT_LAYOUT_TCOD)
@@ -42,18 +43,21 @@ con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 #libtcod.sys_set_fps(LIMIT_FPS)
 
-player_x = SCREEN_WIDTH / 2
-player_y = SCREEN_HEIGHT / 2
+player = Object(con,  SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
+npc = Object(con, SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', libtcod.yellow)
+objects = [npc, player]
 
 while not libtcod.console_is_window_closed():
-    #Set the foreground (text color) of console 1 (our main window) to white
-    libtcod.console_set_default_foreground(con, libtcod.white)
-    libtcod.console_put_char(con, player_x, player_y, '@', libtcod.BKGND_NONE)
+    #Draw all objects
+    for object in objects:
+        object.draw()
+
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
     libtcod.console_flush()
 
-    #Stop character trails by placing a space where the player is. If they don't move, their icon will overwrite this
-    libtcod.console_put_char(con, player_x, player_y, ' ', libtcod.BKGND_NONE)
+    #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
+    for object in objects:
+        object.clear()
 
     #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
     #we process the key press accordingly
