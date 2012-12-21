@@ -17,22 +17,52 @@ LIMIT_FPS = 20
 color_dark_wall = libtcod.Color(105, 105, 105)
 color_dark_ground = libtcod.Color(211, 211, 211)
 
+class Rect:
+    #A rectangle on the map, used to represent a room
+    def __init__(self, x, y, w, h):
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x + w
+        self.y2 = y + h
+
 def make_map():
     global map
 
-    #Fill map with unblocked tiles
-    map = [[Tile(False)
+    #Fill map with blocked tiles, this will allow us to 'carve' rooms for the player
+    #to explore
+    map = [[Tile(True)
         for y in range(MAP_HEIGHT) ]
             for x in range(MAP_WIDTH) ]
 
-    #Set up a few columns to test map placement
-    map[30][22].blocked = True
-    map[30][22].block_sight = True
-    map[50][22].blocked = True
-    map[50][22].block_sight = True
-    map[75][15].blocked = True
-    map[75][15].block_sight = True
+    room1 = Rect(20, 15, 10, 15)
+    room2 = Rect(50, 15, 10, 20)
+    create_room(room1)
+    create_room(room2)
+    create_h_tunnel(25, 55, 23)
 
+def create_room(room):
+    global map
+    #go through each tile in the rectangle and make them passable
+    #range() will exclude the last value in the range, which is perfect,
+    #as we want a one block thick wall surrounding the room
+    for x in range(room.x1, room.x2):
+        for y in range(room.y1, room.y2):
+            map[x][y].blocked = False
+            map[x][y].block_sight = False
+
+def create_h_tunnel(x1, x2, y):
+    #carve a horizontal tunnel from x1 to x2
+    global map
+    for x in range(min(x1, x2), max(x1, x2) + 1):
+        map[x][y].blocked = False
+        map[x][y].block_sight = False
+
+def create_v_tunnel(y1, y2, x):
+    #carve a vertical tunnel from y1 to y2
+    global map
+    for y in range(min(y1, y2), max(y1, y2) + 1):
+        map[x][y].blocked = False
+        map[x][y].block_sight = False
 
 
 def handle_keys():
@@ -94,10 +124,11 @@ con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 #Create the map
 make_map()
 
-#Create our objects, in this case just a player and an NPC, then add them to the objects array
+#Create our objects, in this case just a player, then add them to the objects array
 player = Object(con, map, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
-npc = Object(con, map, SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', libtcod.yellow)
-objects = [npc, player]
+player.x = 25
+player.y = 23
+objects = [player]
 
 while not libtcod.console_is_window_closed():
     #Render the map, and all objects
