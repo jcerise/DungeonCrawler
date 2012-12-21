@@ -25,10 +25,13 @@ def make_map():
         for y in range(MAP_HEIGHT) ]
             for x in range(MAP_WIDTH) ]
 
+    #Set up a few columns to test map placement
     map[30][22].blocked = True
     map[30][22].block_sight = True
     map[50][22].blocked = True
-    map[55][22].block_sight = True
+    map[50][22].block_sight = True
+    map[75][15].blocked = True
+    map[75][15].block_sight = True
 
 
 
