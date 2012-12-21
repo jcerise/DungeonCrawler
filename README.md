@@ -18,9 +18,9 @@ work with Python 3.
 
 Download the code somewhere, unzip/tar it, cd into the directory and run
 
-'''
+```
 python DungeonCrawler.py
-'''
+```
 
 LAlt + Enter = Fullscreen mode
 Escape = Exit
