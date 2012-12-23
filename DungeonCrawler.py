@@ -30,6 +30,9 @@ FOV_ALGO = 0
 FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 4
 
+#Monster and object settings
+MAX_ROOM_MONSTERS = 3
+
 def make_map():
     global map
     global player_start_x
@@ -67,6 +70,9 @@ def make_map():
             #If we've gotten here, the room is valid, and does not intersect any other rooms
             #Carve the room into the maps tiles
             create_room(new_room)
+
+            #add some contents to this room, such as monsters, objects etc
+            place_objects(new_room)
 
             #Get the center coordinates for the new room
             (new_x, new_y) = new_room.center()
@@ -119,6 +125,22 @@ def create_v_tunnel(y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         map[x][y].blocked = False
         map[x][y].block_sight = False
+
+def place_objects(room):
+    num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
+
+    for i in range(num_monsters):
+        x = libtcod.random_get_int(0, room.x1, room.x2)
+        y = libtcod.random_get_int(0, room.y1, room.y2)
+
+        #80 percent chance of an orc spawning
+        if libtcod.random_get_int(0, 0, 100) < 80:
+            #Create an orc
+            monster = Object(x, y, 'o', libtcod.desaturated_green)
+        else:
+            monster = Object(x, y, 'T', libtcod.darker_green)
+
+        objects.append(monster)
 
 
 def handle_keys():
@@ -226,6 +248,7 @@ player = Object(con, fov_map, map, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', lib
 player.x = player_start_x
 player.y = player_start_y
 
+#Add the player to the objects array, which will be drawn to the screen
 objects = []
 objects.insert(0, player)
 
