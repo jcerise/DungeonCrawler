@@ -3,6 +3,9 @@ from gameObject import Object
 from tile import Tile
 from rect import Rect
 
+#TODO: Change gameObject to only take base arguments, but have methods that require advanced map objects
+#This will allow for creation of objects before the map has been initialized.
+
 #Set the size of our window
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -184,6 +187,7 @@ def render_all():
     global fov_map, color_dark_wall, color_light_wall
     global color_dark_ground, color_light_ground
     global fov_recompute
+    global con
 
     if fov_recompute:
         #Recompute the Field of view (Player movement, door opened, etc)
@@ -214,7 +218,7 @@ def render_all():
 
     #Draw all objects in the list
     for object in objects:
-        object.draw()
+        object.draw(fov_map, con)
 
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
@@ -235,6 +239,9 @@ con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 #libtcod.sys_set_fps(LIMIT_FPS)
 
+#Initialize the objects array
+objects = []
+
 #Create the map
 make_map()
 
@@ -244,12 +251,11 @@ for y in range(MAP_HEIGHT):
         libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
 
 #Create our objects, in this case just a player, then add them to the objects array
-player = Object(con, fov_map, map, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
+player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
 player.x = player_start_x
 player.y = player_start_y
 
 #Add the player to the objects array, which will be drawn to the screen
-objects = []
 objects.insert(0, player)
 
 fov_recompute = True
@@ -262,7 +268,7 @@ while not libtcod.console_is_window_closed():
 
     #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
     for object in objects:
-        object.clear()
+        object.clear(con)
 
     #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
     #we process the key press accordingly
