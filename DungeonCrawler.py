@@ -20,8 +20,15 @@ ROOM_MIN_SIZE = 4
 MAX_ROOMS = 30
 
 #Set the colors for floor and wall tiles
-color_dark_wall = libtcod.Color(85, 85, 85)
-color_dark_ground = libtcod.Color(117, 104, 87)
+color_dark_wall = libtcod.Color(63, 63, 63)
+color_light_wall = libtcod.Color(159, 159, 159)
+color_dark_ground = libtcod.Color(63, 50, 31)
+color_light_ground = libtcod.Color(158, 134, 100)
+
+#Field of View Algorithm settings
+FOV_ALGO = 0
+FOV_LIGHT_WALLS = True
+TORCH_RADIUS = 4
 
 def make_map():
     global map
@@ -116,6 +123,7 @@ def create_v_tunnel(y1, y2, x):
 
 def handle_keys():
     global player_x, player_y
+    global fov_recompute
 
     #Wait for the player to press a key before continuing
     key = libtcod.console_wait_for_keypress(True)
@@ -136,24 +144,51 @@ def handle_keys():
         return True
 
     #Handle movement keys
+    #Also, flag the field of view for re-computation each time the player moves
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
         player.move(0, -1)
+        fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
         player.move(0, 1)
+        fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
         player.move(1, 0)
+        fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
         player.move(-1, 0)
+        fov_recompute = True
 
 def render_all():
-    #Draw the map
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
-            wall = map[x][y].block_sight
-            if wall:
-                libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
-            else:
-                libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+    global fov_map, color_dark_wall, color_light_wall
+    global color_dark_ground, color_light_ground
+    global fov_recompute
+
+    if fov_recompute:
+        #Recompute the Field of view (Player movement, door opened, etc)
+        fov_recompute = False
+        libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+
+        #Draw the map, set each tiles color according to the Field of View
+        for y in range(MAP_HEIGHT):
+            for x in range(MAP_WIDTH):
+                visible = libtcod.map_is_in_fov(fov_map, x, y)
+                wall = map[x][y].block_sight
+                if not visible:
+                    #This tile is not visible, check if its been explored
+                    if map[x][y].explored:
+                        #This tile has not been explored yet, so do not show it
+                        if wall:
+                            libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+                        else:
+                            libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+                else:
+                    #This tile is visible
+                    if wall:
+                        libtcod.console_set_char_background(con, x, y, color_light_wall, libtcod.BKGND_SET)
+                    else:
+                        libtcod.console_set_char_background(con, x, y, color_light_ground, libtcod.BKGND_SET)
+                    #Mark the tile as explored, so it will continue to show on the map
+                    map[x][y].explored = True
 
     #Draw all objects in the list
     for object in objects:
@@ -181,13 +216,20 @@ con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 #Create the map
 make_map()
 
+fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
+for y in range(MAP_HEIGHT):
+    for x in range(MAP_WIDTH):
+        libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
+
 #Create our objects, in this case just a player, then add them to the objects array
-player = Object(con, map, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
+player = Object(con, fov_map, map, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
 player.x = player_start_x
 player.y = player_start_y
 
 objects = []
 objects.insert(0, player)
+
+fov_recompute = True
 
 while not libtcod.console_is_window_closed():
     #Render the map, and all objects
