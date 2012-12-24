@@ -11,9 +11,9 @@ class Object:
         self.name = name
         self.blocks = blocks
 
-    def move(self, gameMap, dx, dy):
+    def move(self, gameMap, dx, dy, blocked):
         #Update the position of this object
-        if not gameMap[self.x + dx][self.y + dy].blocked:
+        if not blocked:
             self.x += dx
             self.y += dy
 

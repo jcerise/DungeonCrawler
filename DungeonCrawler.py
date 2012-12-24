@@ -136,14 +136,28 @@ def place_objects(room):
         x = libtcod.random_get_int(0, room.x1, room.x2)
         y = libtcod.random_get_int(0, room.y1, room.y2)
 
-        #80 percent chance of an orc spawning
-        if libtcod.random_get_int(0, 0, 100) < 80:
-            #Create an orc
-            monster = Object(x, y, 'o', libtcod.desaturated_green)
-        else:
-            monster = Object(x, y, 'T', libtcod.darker_green)
+        if not is_blocked(x, y):
+            #80 percent chance of an orc spawning
+            if libtcod.random_get_int(0, 0, 100) < 80:
+                #Create an orc
+                monster = Object(x, y, 'o', 'Orc', libtcod.desaturated_green, True)
+            else:
+                monster = Object(x, y, 'T', 'Troll', libtcod.darker_green, True)
+            #Add the monster to the objects array
+            objects.append(monster)
 
-        objects.append(monster)
+def is_blocked(x, y):
+    #Test the map tile at the coordinates to see if it is blocked or not
+    if map[x][y].blocked:
+        return True
+
+    #Then, check through all objects and see if any of them are blocking
+    for object in objects:
+        if object.blocks and object.x == x and object.y == y:
+            return True
+
+    #There is no object or tile blocking this position
+    return False
 
 
 def handle_keys():
@@ -172,16 +186,21 @@ def handle_keys():
     #Handle movement keys
     #Also, flag the field of view for re-computation each time the player moves
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        player.move(map, 0, -1)
+        #Check to see if the move is valid (IE, no blocking objects in destination)
+        blocked = is_blocked(player.x + 0, player.y + -1)
+        player.move(map, 0, -1, blocked)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        player.move(map, 0, 1)
+        blocked = is_blocked(player.x + 0, player.y + 1)
+        player.move(map, 0, 1, blocked)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        player.move(map, 1, 0)
+        blocked = is_blocked(player.x + 1, player.y + 0)
+        player.move(map, 1, 0, blocked)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        player.move(map, -1, 0)
+        blocked = is_blocked(player.x + -1, player.y + 0)
+        player.move(map, -1, 0, blocked)
         fov_recompute = True
 
 def render_all():
@@ -252,7 +271,7 @@ for y in range(MAP_HEIGHT):
         libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
 
 #Create our objects, in this case just a player, then add them to the objects array
-player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', libtcod.white)
+player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True)
 player.x = player_start_x
 player.y = player_start_y
 
