@@ -160,6 +160,27 @@ def is_blocked(x, y):
     #There is no object or tile blocking this position
     return False
 
+def player_move_or_attack(dx, dy):
+    global fov_recompute
+
+    #Figure out where the player wants to move to
+    x = player.x + dx
+    y = player.y + dy
+
+    #Check if there is a valid target at the destination
+    target = None
+    for object in objects:
+        if object.x == x and object.y == y:
+            target = object
+            break
+
+    #If there is a valid target at the destination, attack it, if not, move there
+    if target is not None:
+        print "The " + target.name + " laughs at your puny attempt to attack him!"
+    else:
+        blocked = is_blocked(x, y)
+        player.move(map, dx, dy, blocked)
+        fov_recompute = True
 
 def handle_keys():
     global player_x, player_y
@@ -188,22 +209,13 @@ def handle_keys():
     #Also, flag the field of view for re-computation each time the player moves
     if game_state == 'playing':
         if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-            #Check to see if the move is valid (IE, no blocking objects in destination)
-            blocked = is_blocked(player.x + 0, player.y + -1)
-            player.move(map, 0, -1, blocked)
-            fov_recompute = True
+            player_move_or_attack(0, -1)
         elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-            blocked = is_blocked(player.x + 0, player.y + 1)
-            player.move(map, 0, 1, blocked)
-            fov_recompute = True
+            player_move_or_attack(0, 1)
         elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-            blocked = is_blocked(player.x + 1, player.y + 0)
-            player.move(map, 1, 0, blocked)
-            fov_recompute = True
+            player_move_or_attack(1, 0)
         elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-            blocked = is_blocked(player.x + -1, player.y + 0)
-            player.move(map, -1, 0, blocked)
-            fov_recompute = True
+            player_move_or_attack(-1, 0)
         else:
             return 'didnt-take-turn'
 
@@ -301,4 +313,10 @@ while not libtcod.console_is_window_closed():
     player_action = handle_keys()
     if player_action == 'exit':
         break
+
+    #Let the monsters take their turn
+    if game_state == 'playing' and player_action != 'didnt-take-turn':
+        for object in objects:
+            if object!= player:
+                print 'The ' + object.name + ' growls!'
 
