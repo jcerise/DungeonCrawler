@@ -181,27 +181,30 @@ def handle_keys():
 
     elif key.vk == libtcod.KEY_ESCAPE:
         #Escape, exit game
-        return True
+        return 'exit'
 
     #Handle movement keys
     #Also, flag the field of view for re-computation each time the player moves
-    if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        #Check to see if the move is valid (IE, no blocking objects in destination)
-        blocked = is_blocked(player.x + 0, player.y + -1)
-        player.move(map, 0, -1, blocked)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        blocked = is_blocked(player.x + 0, player.y + 1)
-        player.move(map, 0, 1, blocked)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        blocked = is_blocked(player.x + 1, player.y + 0)
-        player.move(map, 1, 0, blocked)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        blocked = is_blocked(player.x + -1, player.y + 0)
-        player.move(map, -1, 0, blocked)
-        fov_recompute = True
+    if game_state == 'playing':
+        if libtcod.console_is_key_pressed(libtcod.KEY_UP):
+            #Check to see if the move is valid (IE, no blocking objects in destination)
+            blocked = is_blocked(player.x + 0, player.y + -1)
+            player.move(map, 0, -1, blocked)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+            blocked = is_blocked(player.x + 0, player.y + 1)
+            player.move(map, 0, 1, blocked)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+            blocked = is_blocked(player.x + 1, player.y + 0)
+            player.move(map, 1, 0, blocked)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+            blocked = is_blocked(player.x + -1, player.y + 0)
+            player.move(map, -1, 0, blocked)
+            fov_recompute = True
+        else:
+            return 'didnt-take-turn'
 
 def render_all():
     global fov_map, color_dark_wall, color_light_wall
@@ -278,6 +281,8 @@ player.y = player_start_y
 #Add the player to the objects array, which will be drawn to the screen
 objects.insert(0, player)
 
+game_state = 'playing'
+player_action = None
 fov_recompute = True
 
 while not libtcod.console_is_window_closed():
@@ -292,7 +297,7 @@ while not libtcod.console_is_window_closed():
 
     #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
     #we process the key press accordingly
-    exit = handle_keys()
-    if exit:
+    player_action = handle_keys()
+    if player_action == 'exit':
         break
 
