@@ -149,6 +149,7 @@ def place_objects(room):
 def handle_keys():
     global player_x, player_y
     global fov_recompute
+    global map
 
     #Wait for the player to press a key before continuing
     key = libtcod.console_wait_for_keypress(True)
@@ -171,16 +172,16 @@ def handle_keys():
     #Handle movement keys
     #Also, flag the field of view for re-computation each time the player moves
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        player.move(0, -1)
+        player.move(map, 0, -1)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        player.move(0, 1)
+        player.move(map, 0, 1)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        player.move(1, 0)
+        player.move(map, 1, 0)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        player.move(-1, 0)
+        player.move(map, -1, 0)
         fov_recompute = True
 
 def render_all():

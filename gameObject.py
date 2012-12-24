@@ -3,15 +3,17 @@ import libtcodpy as libtcod
 class Object:
     #Represents a generic object within the game; A chair, a player, an orc, stairs
     #This object is always represented by a character on the screen
-    def __init__(self, x, y, char, color):
+    def __init__(self, x, y, char, name, color, blocks = False):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
+        self.name = name
+        self.blocks = blocks
 
-    def move(self, dx, dy):
+    def move(self, gameMap, dx, dy):
         #Update the position of this object
-        if not self.gameMap[self.x + dx][self.y + dy].blocked:
+        if not gameMap[self.x + dx][self.y + dy].blocked:
             self.x += dx
             self.y += dy
 
@@ -23,5 +25,4 @@ class Object:
 
     def clear(self, con):
         #Erase the character that represents this object
-        libtcod.console_put_char(self.x, self.y, ' ', libtcod.BKGND_NONE)
-
+        libtcod.console_put_char(con, self.x, self.y, ' ', libtcod.BKGND_NONE)
