@@ -74,9 +74,6 @@ def make_map():
             #Carve the room into the maps tiles
             create_room(new_room)
 
-            #add some contents to this room, such as monsters, objects etc
-            place_objects(new_room)
-
             #Get the center coordinates for the new room
             (new_x, new_y) = new_room.center()
 
@@ -86,6 +83,10 @@ def make_map():
                 player_start_y = new_y
             else:
                 #This is not the first room, so connect it to the previous room via tunnels
+
+                #add some contents to this room, such as monsters, objects etc. We never add creatures to the
+                #starting room
+                place_objects(new_room)
 
                 #Get the center coordinates for the previous room
                 (prev_x, prev_y) = rooms[num_rooms - 1].center()
