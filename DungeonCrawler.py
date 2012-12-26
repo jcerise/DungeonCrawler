@@ -1,5 +1,5 @@
 import libtcodpy as libtcod
-from gameObject import Object
+from gameObject import *
 from tile import Tile
 from rect import Rect
 
@@ -139,11 +139,16 @@ def place_objects(room):
 
         if not is_blocked(x, y):
             #80 percent chance of an orc spawning
+            monster_death = getattr(Fighter, 'monster_death')
             if libtcod.random_get_int(0, 0, 100) < 80:
                 #Create an orc
-                monster = Object(x, y, 'o', 'Orc', libtcod.desaturated_green, True)
+                fighter_component = Fighter(hp = 10, defense = 0, power = 3, death_function = monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'o', 'Orc', libtcod.desaturated_green, True, fighter_component, ai_component)
             else:
-                monster = Object(x, y, 'T', 'Troll', libtcod.darker_green, True)
+                fighter_component = Fighter(hp = 16, defense = 1, power = 4, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'T', 'Troll', libtcod.darker_green, True, fighter_component, ai_component)
             #Add the monster to the objects array
             objects.append(monster)
 
@@ -170,13 +175,13 @@ def player_move_or_attack(dx, dy):
     #Check if there is a valid target at the destination
     target = None
     for object in objects:
-        if object.x == x and object.y == y:
+        if object.fighter and object.x == x and object.y == y:
             target = object
             break
 
     #If there is a valid target at the destination, attack it, if not, move there
     if target is not None:
-        print "The " + target.name + " laughs at your puny attempt to attack him!"
+        player.fighter.attack(target)
     else:
         blocked = is_blocked(x, y)
         player.move(map, dx, dy, blocked)
@@ -254,9 +259,17 @@ def render_all():
 
     #Draw all objects in the list
     for object in objects:
-        object.draw(fov_map, con)
+        if object != player:
+            object.draw(fov_map, con)
+    #Draw the player last so it appears on top of everything else
+    player.draw(fov_map, con)
 
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+
+    #Print the players basic stats
+    libtcod.console_set_default_foreground(con, libtcod.white)
+    libtcod.console_print_ex(0, 1, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.LEFT,
+        'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
 
 
 #####################################
@@ -287,7 +300,11 @@ for y in range(MAP_HEIGHT):
         libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
 
 #Create our objects, in this case just a player, then add them to the objects array
-player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True)
+#Create a fighter component for the player. The player does not need an AI
+player_death = getattr(Fighter, 'player_death')
+fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
+player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
+    fighter = fighter_component)
 player.x = player_start_x
 player.y = player_start_y
 
@@ -314,9 +331,13 @@ while not libtcod.console_is_window_closed():
     if player_action == 'exit':
         break
 
+    player_alive = player.check_if_dead()
+    if not player_alive:
+        break
+
     #Let the monsters take their turn
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for object in objects:
-            if object!= player:
-                print 'The ' + object.name + ' growls!'
+            if object.ai:
+                object.ai.take_turn(map, fov_map, player, objects)
 
