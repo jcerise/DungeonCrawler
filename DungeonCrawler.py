@@ -12,7 +12,7 @@ SCREEN_HEIGHT = 50
 
 #Set the size of our playable map
 MAP_WIDTH = 80
-MAP_HEIGHT = 45
+MAP_HEIGHT = 43
 
 #Set the framerate limit. We do not use this, as our game is turn based, not real time
 LIMIT_FPS = 20
@@ -32,6 +32,11 @@ color_light_ground = libtcod.Color(158, 134, 100)
 FOV_ALGO = 0
 FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 4
+
+#Sizes and Coordinates for the GUI
+BAR_WIDTH = 20
+PANEL_HEIGHT = 7
+PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 
 #Monster and object settings
 MAX_ROOM_MONSTERS = 3
@@ -224,6 +229,24 @@ def handle_keys():
         else:
             return 'didnt-take-turn'
 
+def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
+    #Build and render a status bar (health, mana, experience, etc)
+    bar_width = int(float(value) / maximum * total_width)
+
+    #Render the background first
+    libtcod.console_set_default_background(panel, back_color)
+    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+
+    #Now, render the bar on top
+    libtcod.console_set_default_background(panel, bar_color)
+    if bar_width > 0:
+        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+
+    #Finally, put the name of the bar, and the actual values on top of everything, for clarity
+    libtcod.console_set_default_foreground(panel, libtcod.white)
+    libtcod.console_print_ex(panel, x + total_width / 2, y, libtcod.BKGND_NONE, libtcod.CENTER,
+        name + ': ' + str(value) + '/' + str(maximum))
+
 def render_all():
     global fov_map, color_dark_wall, color_light_wall
     global color_dark_ground, color_light_ground
@@ -264,13 +287,18 @@ def render_all():
     #Draw the player last so it appears on top of everything else
     player.draw(fov_map, con)
 
-    libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+    libtcod.console_blit(con, 0, 0, MAP_WIDTH, MAP_HEIGHT, 0, 0, 0)
 
-    #Print the players basic stats
-    libtcod.console_set_default_foreground(con, libtcod.white)
-    libtcod.console_print_ex(0, 1, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.LEFT,
-        'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
+    #Prepare to render the GUI panel
+    libtcod.console_set_default_background(panel, libtcod.black)
+    libtcod.console_clear(panel)
 
+    #Show the players stats
+    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
+        libtcod.light_red, libtcod.darker_red)
+
+    #Blit the new console for the GUI onto the screen
+    libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
 
 #####################################
 # Initialization and Main Loop
@@ -283,7 +311,7 @@ libtcod.console_set_custom_font('fonts/arial10x10.png', libtcod.FONT_TYPE_GRAYSC
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DungeonCrawler', False)
 
 #Set up a off-screen console to act as a drawing buffer
-con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 #libtcod.sys_set_fps(LIMIT_FPS)
@@ -314,6 +342,8 @@ objects.insert(0, player)
 game_state = 'playing'
 player_action = None
 fov_recompute = True
+
+panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
 while not libtcod.console_is_window_closed():
     #Render the map, and all objects
