@@ -204,9 +204,7 @@ def handle_keys():
     global player_x, player_y
     global fov_recompute
     global map
-
-    #Wait for the player to press a key before continuing
-    key = libtcod.console_wait_for_keypress(True)
+    global key
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         #ALT + Enter, toggle fullscreen
@@ -226,16 +224,29 @@ def handle_keys():
     #Handle movement keys
     #Also, flag the field of view for re-computation each time the player moves
     if game_state == 'playing':
-        if libtcod.console_is_key_pressed(libtcod.KEY_UP):
+        if key.vk == libtcod.KEY_UP:
             player_move_or_attack(0, -1)
-        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+        elif key.vk == libtcod.KEY_DOWN:
             player_move_or_attack(0, 1)
-        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+        elif key.vk == libtcod.KEY_RIGHT:
             player_move_or_attack(1, 0)
-        elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+        elif key.vk == libtcod.KEY_LEFT:
             player_move_or_attack(-1, 0)
         else:
             return 'didnt-take-turn'
+
+def get_names_under_mouse():
+    global mouse
+
+    #rGet the coordinates of the mouse click
+    (x, y) = (mouse.cx, mouse.cy)
+
+    #create a list with the names of all objects at the mouses coordinates, and within FOV
+    names = [obj.name for obj in objects
+        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(fov_map, obj.x, obj.y)]
+    #Separate all names with commas, and capitalize them
+    names = ', '.join(names)
+    return names.capitalize()
 
 def message(new_msg, color = libtcod.white):
     #Split the message to multiple lines if its too long
@@ -320,6 +331,10 @@ def render_all():
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_red)
 
+    #Display the names of objects under the mouse
+    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
+    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse())
+
     #Print out messages in the game messages log
     y = 1
     for (line, color) in game_msgs:
@@ -344,7 +359,7 @@ libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DungeonCrawler', False)
 con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
-#libtcod.sys_set_fps(LIMIT_FPS)
+libtcod.sys_set_fps(LIMIT_FPS)
 
 #Initialize the objects array
 objects = []
@@ -382,7 +397,12 @@ game_msgs = []
 #Add a welcome message
 message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
 
+mouse = libtcod.Mouse()
+key = libtcod.Key()
+
 while not libtcod.console_is_window_closed():
+    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+
     #Render the map, and all objects
     render_all()
 
