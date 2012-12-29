@@ -95,7 +95,7 @@ class Fighter:
         if self.hp <= 0:
             function = self.death_function
             if function is not None:
-                function(self, self.owner)
+                return function(self, self.owner)
 
     def attack(self, target):
         #Simple damage calculation - power minus target defense
@@ -103,34 +103,42 @@ class Fighter:
 
         if damage > 0:
             #Make the target take some damage
-            print self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' damage!'
-            target.fighter.take_damage(damage)
+            message = []
+            message.append(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' damage!')
+            death_string = target.fighter.take_damage(damage)
+            if death_string is not None:
+                message.append(death_string)
+            return message
         else:
-            print self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!'
+            message = []
+            message.append(self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!')
+            return message
 
     def player_death(self, player):
         #The player has died, replace him with a corpse and end the game
-        print 'You died!'
         player.set_alive_or_dead(False)
 
         #Change the players icon into a corpse
         player.char = '%'
         player.color = libtcod.dark_red
+        return 'You Died!'
 
     def monster_death(self, monster):
         #Change the monster into a corpse. It cannot attack, doesnt block, and cant move
-        print monster.name.capitalize() + ' is dead!'
         monster.char = '%'
         monster.color = libtcod.dark_red
         monster.blocks = False
         monster.fighter = None
         monster.ai = None
+        message = monster.name.capitalize() + ' is dead!'
         monster.name = 'Remains of ' + monster.name
+        return message
 
 
 class BasicMonster:
     #Defines a basic monster, extends the Fighter component
     def take_turn(self, gameMap, fovMap, player, objects):
+        messages = []
         #If you can see the monster, the monster can see you
         monster = self.owner
         if libtcod.map_is_in_fov(fovMap, monster.x, monster.y):
@@ -139,5 +147,6 @@ class BasicMonster:
                 monster.move_towards(gameMap, objects, player.x, player.y)
             elif player.fighter.hp > 0:
                 #The monster is close enough, attempt an attack on the player
-                monster.fighter.attack(player)
+                messages.extend(monster.fighter.attack(player))
+        return messages
 

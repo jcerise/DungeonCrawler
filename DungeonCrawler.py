@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+import textwrap
 from gameObject import *
 from tile import Tile
 from rect import Rect
@@ -37,6 +38,11 @@ TORCH_RADIUS = 4
 BAR_WIDTH = 20
 PANEL_HEIGHT = 7
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+
+#Message log constants
+MSG_X = BAR_WIDTH + 2
+MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
+MSG_HEIGHT = PANEL_HEIGHT - 1
 
 #Monster and object settings
 MAX_ROOM_MONSTERS = 3
@@ -186,7 +192,7 @@ def player_move_or_attack(dx, dy):
 
     #If there is a valid target at the destination, attack it, if not, move there
     if target is not None:
-        player.fighter.attack(target)
+        message(player.fighter.attack(target))
     else:
         blocked = is_blocked(x, y)
         player.move(map, dx, dy, blocked)
@@ -228,6 +234,21 @@ def handle_keys():
             player_move_or_attack(-1, 0)
         else:
             return 'didnt-take-turn'
+
+def message(new_msg, color = libtcod.white):
+    #Split the message to multiple lines if its too long
+    #wrapper = TextWrapper()
+
+    new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
+
+    for line in new_msg_lines:
+        #Check if the buffer is full, if so, remove the first line to make room for the new line
+        if len(game_msgs) == MSG_HEIGHT:
+            del game_msgs[0]
+
+        #Add the new line as a tuple, setting the text and the text color
+        game_msgs.append((line, color))
+
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     #Build and render a status bar (health, mana, experience, etc)
@@ -297,6 +318,13 @@ def render_all():
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_red)
 
+    #Print out messages in the game messages log
+    y = 1
+    for (line, color) in game_msgs:
+        libtcod.console_set_default_foreground(panel, color)
+        libtcod.console_print_ex(panel, MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
+        y += 1
+
     #Blit the new console for the GUI onto the screen
     libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
 
@@ -343,7 +371,14 @@ game_state = 'playing'
 player_action = None
 fov_recompute = True
 
+#Create a panel for the GUI
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+
+#Create an empty list for game messages
+game_msgs = []
+
+#Add a welcome message
+message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
 
 while not libtcod.console_is_window_closed():
     #Render the map, and all objects
@@ -363,11 +398,14 @@ while not libtcod.console_is_window_closed():
 
     player_alive = player.check_if_dead()
     if not player_alive:
-        break
+        game_state = 'dead'
 
     #Let the monsters take their turn
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for object in objects:
             if object.ai:
-                object.ai.take_turn(map, fov_map, player, objects)
+               messages = object.ai.take_turn(map, fov_map, player, objects)
+               if len(messages) > 0:
+                   for line in messages:
+                       message(line)
 
