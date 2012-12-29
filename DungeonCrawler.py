@@ -192,7 +192,9 @@ def player_move_or_attack(dx, dy):
 
     #If there is a valid target at the destination, attack it, if not, move there
     if target is not None:
-        message(player.fighter.attack(target))
+        messages = player.fighter.attack(target)
+        for line, color in messages:
+            message(line, color)
     else:
         blocked = is_blocked(x, y)
         player.move(map, dx, dy, blocked)
@@ -406,6 +408,6 @@ while not libtcod.console_is_window_closed():
             if object.ai:
                messages = object.ai.take_turn(map, fov_map, player, objects)
                if len(messages) > 0:
-                   for line in messages:
-                       message(line)
+                   for line, color in messages:
+                       message(line, color)
 

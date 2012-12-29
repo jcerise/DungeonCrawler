@@ -79,6 +79,8 @@ class Object:
 class Fighter:
     #A component that forms the basis for anything in the game that can fight, such as a monster, the player,
     #or an NPC.
+    #Each action method (take_damage, attack, etc, returns a list of messages that will be printed to the console,
+    #so the player knows whats going on. Each message has a color associated with it
     def __init__(self, hp, defense, power, death_function = None):
         self.hp = hp
         self.max_hp = hp
@@ -95,6 +97,7 @@ class Fighter:
         if self.hp <= 0:
             function = self.death_function
             if function is not None:
+                #Return the messages printed upon execution of this event
                 return function(self, self.owner)
 
     def attack(self, target):
@@ -103,16 +106,21 @@ class Fighter:
 
         if damage > 0:
             #Make the target take some damage
-            message = []
-            message.append(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' damage!')
+            #Create a list of messages to return to the console, so the player knows whats going on
+            #This needs to be an list, as the potential death message needs to be on its own line
+            message = [[self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' damage!',
+                        libtcod.white]]
+
+            #If the fighter has not died, this will return None, otherwise it returns the death message
             death_string = target.fighter.take_damage(damage)
             if death_string is not None:
                 message.append(death_string)
+            #Return the messages array to print to the console
             return message
         else:
-            message = []
-            message.append(self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!')
-            return message
+            #Create a message array to return to the console
+            return [[self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!',
+                     libtcod.white]]
 
     def player_death(self, player):
         #The player has died, replace him with a corpse and end the game
@@ -121,7 +129,7 @@ class Fighter:
         #Change the players icon into a corpse
         player.char = '%'
         player.color = libtcod.dark_red
-        return 'You Died!'
+        return ['You have died a terrible death at the hands of the denizens of this foul place...', libtcod.dark_red]
 
     def monster_death(self, monster):
         #Change the monster into a corpse. It cannot attack, doesnt block, and cant move
@@ -130,13 +138,14 @@ class Fighter:
         monster.blocks = False
         monster.fighter = None
         monster.ai = None
-        message = monster.name.capitalize() + ' is dead!'
+        message = ['You have slain the ' + monster.name.capitalize(), libtcod.orange]
         monster.name = 'Remains of ' + monster.name
         return message
 
 
 class BasicMonster:
     #Defines a basic monster, extends the Fighter component
+    #Returns a list of messages to be printed to the console, outlining this monsters turn
     def take_turn(self, gameMap, fovMap, player, objects):
         messages = []
         #If you can see the monster, the monster can see you
