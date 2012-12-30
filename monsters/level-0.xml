@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+        <level-zero-monsters>
+            <monster name="Rat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>5</hit-points>
+                <defense>0</defense>
+                <attack-power>1</attack-power>
+                <character>r</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+            </monster>
+            <monster name="Giant Rat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>10</hit-points>
+                <defense>0</defense>
+                <attack-power>2</attack-power>
+                <character>R</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>15</encounter-chance>
+            </monster>
+            <monster name="Snake">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>7</hit-points>
+                <defense>0</defense>
+                <attack-power>2</attack-power>
+                <character>s</character>
+                <color-r>0</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>30</encounter-chance>
+            </monster>
+            <monster name="Giant Snake">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>12</hit-points>
+                <defense>0</defense>
+                <attack-power>3</attack-power>
+                <character>S</character>
+                <color-r>0</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>15</encounter-chance>
+            </monster>
+            <monster name="Bat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>5</hit-points>
+                <defense>0</defense>
+                <attack-power>1</attack-power>
+                <character>b</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+            </monster>
+            <monster name="Giant Bat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>8</hit-points>
+                <defense>0</defense>
+                <attack-power>2</attack-power>
+                <character>B</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>25</encounter-chance>
+            </monster>
+            <monster name="Goblin">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>15</hit-points>
+                <defense>1</defense>
+                <attack-power>4</attack-power>
+                <character>g</character>
+                <color-r>0</color-r>
+                <color-g>128</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>5</encounter-chance>
+            </monster>
+        </level-zero-monsters>
