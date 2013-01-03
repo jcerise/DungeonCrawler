@@ -47,6 +47,7 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 
 #Monster and object settings
 MAX_ROOM_MONSTERS = 3
+MAX_ROOM_ITEMS = 2
 
 def make_map():
     global map
@@ -145,7 +146,10 @@ def create_v_tunnel(y1, y2, x):
 def place_objects(room):
     global monsters
     global monster_appearance_chances
+    global items
+    global item_appearance_chances
 
+    #Place Monsters in each room, randomly or course
     num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
 
     for i in range(num_monsters):
@@ -177,6 +181,19 @@ def place_objects(room):
 
             #Add the monster to the objects array
             objects.append(monster)
+
+    #Place items in each room, randomly as well
+    num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
+
+    for i in range(num_items):
+        #Create x num_items number of items in this room
+        x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
+        y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
+
+        if not is_blocked(x, y):
+            item_component = Item()
+            item = Object(x, y, '!', 'Small Healing Potion', libtcod.violet, item = item_component)
+            objects.append(item)
 
 def random_choice_index(chances):
     #Choose an option from a list of chances
@@ -238,6 +255,8 @@ def handle_keys():
     global fov_recompute
     global map
     global key
+    global inventory
+    global objects
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         #ALT + Enter, toggle fullscreen
@@ -266,6 +285,25 @@ def handle_keys():
         elif key.vk == libtcod.KEY_LEFT:
             player_move_or_attack(-1, 0)
         else:
+            #Test for other keys
+            key_char = chr(key.c)
+
+            if key_char == 'g':
+                #pick up an item
+                for object in objects:
+                    #Check for an item in the players currently occupied tile
+                    if object.x == player.x and  object.y == player.y and object.item:
+                        #Check if its an item, and then pick it up
+                        action_result = object.item.pick_up(inventory, objects)
+                        #Set the inventory to reflect the pick up action
+                        inventory = action_result[1]
+                        #Set the objects array to reflect the pick up action
+                        objects = action_result[2]
+                        #Print out any messages associated with this action
+                        for line, color in action_result[0]:
+                            message(line, color)
+                        break
+
             return 'didnt-take-turn'
 
 def get_names_under_mouse():
@@ -467,6 +505,9 @@ message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable so
 
 mouse = libtcod.Mouse()
 key = libtcod.Key()
+
+#Initialize the players inventory, empty of course
+inventory = []
 
 while not libtcod.console_is_window_closed():
     libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)

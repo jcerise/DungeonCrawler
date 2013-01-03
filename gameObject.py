@@ -4,7 +4,7 @@ import math
 class Object:
     #Represents a generic object within the game; A chair, a player, an orc, stairs
     #This object is always represented by a character on the screen
-    def __init__(self, x, y, char, name, color, blocks = False, fighter = None, ai = None):
+    def __init__(self, x, y, char, name, color, blocks = False, fighter = None, ai = None, item = None):
         self.x = x
         self.y = y
         self.char = char
@@ -20,6 +20,10 @@ class Object:
         self.ai = ai
         if self.ai:
             self.ai.owner = self
+
+        self.item = item
+        if self.item:
+            self.item.owner = self
 
     def move(self, gameMap, dx, dy, blocked):
         #Update the position of this object
@@ -158,4 +162,17 @@ class BasicMonster:
                 #The monster is close enough, attempt an attack on the player
                 messages.extend(monster.fighter.attack(player))
         return messages
+
+class Item:
+    #Defines an item that can be picked up and used
+    def pick_up(self, inventory, objects):
+        if len(inventory) >= 26:
+            message = [['Your inventory is full, and you cannot pick up ' + self.owner.name + '.', libtcod.yellow]]
+        else:
+            inventory.append(self.owner)
+            objects.remove(self.owner)
+            message = [["You picked up a " + self.owner.name + '!', libtcod.green]]
+
+        return [message, inventory, objects]
+
 

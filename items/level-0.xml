@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+        <level-zero-items>
+            <item name="Small Healing Potion">
+                <type>item</type>
+                <character>!</character>
+                <color-r>255</color-r>
+                <color-g>115</color-g>
+                <color-b>115</color-b>
+                <encounter-chance>50</encounter-chance>
+            </item>
+        </level-zero-items>
