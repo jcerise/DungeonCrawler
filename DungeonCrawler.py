@@ -39,6 +39,7 @@ TORCH_RADIUS = 4
 BAR_WIDTH = 20
 PANEL_HEIGHT = 7
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+INVENTORY_WIDTH = 50
 
 #Message log constants
 MSG_X = BAR_WIDTH + 2
@@ -303,6 +304,9 @@ def handle_keys():
                         for line, color in action_result[0]:
                             message(line, color)
                         break
+            if key_char == 'i':
+                #Show the inventory
+                inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
 
             return 'didnt-take-turn'
 
@@ -333,6 +337,49 @@ def message(new_msg, color = libtcod.white):
         #Add the new line as a tuple, setting the text and the text color
         game_msgs.append((line, color))
 
+def menu(header, options, width):
+    #First, make sure the menu has 26 or fewer items (This is due to an alphabetical selection limitation)
+    if len(options) > 26:
+        raise ValueError('Cannot have a menu with more than 26 options!')
+
+    #implicitly calculate the height of the window, based on the header height (after word wrap) and the number
+    # of options
+    header_height = libtcod.console_get_height_rect(con, 0, 0, width, SCREEN_HEIGHT, header)
+    height = len(options) + header_height
+
+    #Create an offscreen console that represents the menus window
+    window = libtcod.console_new(width, height)
+
+    #Print the header to our offscreen console
+    libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+
+    #Print all the options, with a corresponding ASCII character
+    y = header_height
+    #Get the ASCII value of the letter 'a'
+    letter_index = ord('a')
+    for option_text in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+        y += 1
+        letter_index += 1
+
+    #Blit the contents of the window to the main game screen, centered
+    x = SCREEN_WIDTH / 2 - width / 2
+    y = SCREEN_HEIGHT /2 - height / 2
+    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+
+    #Now that the console is presented to the player, wait for them to make a choice before doing anything else
+    libtcod.console_flush()
+    key = libtcod.console_wait_for_keypress(True)
+
+def inventory_menu(header):
+    #Show a menu with each item of the inventory as an option
+    if len(inventory) == 0:
+        options = ['Inventory is empty!']
+    else:
+        options = [item.name for item in inventory]
+    index = menu(header, options, INVENTORY_WIDTH)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     #Build and render a status bar (health, mana, experience, etc)
