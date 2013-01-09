@@ -202,8 +202,8 @@ def place_objects(room):
             item_use_function = getattr(Item, item[2])
 
             #Create an object and item component from the loaded values
-            item_component = Item(value = int(item[3]), use_function = item_use_function)
-            item = Object(x, y, item[4], item[0], color = libtcod.Color(int(item[5]), int(item[6]), int(item[7])),
+            item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function)
+            item = Object(x, y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
                 item = item_component)
             objects.append(item)
 
@@ -255,7 +255,7 @@ def player_move_or_attack(dx, dy):
     #If there is a valid target at the destination, attack it, if not, move there
     if target is not None:
         messages = player.fighter.attack(target)
-        for line, color in messages:
+        for success, line, color in messages:
             message(line, color)
     else:
         blocked = is_blocked(x, y)
@@ -308,7 +308,7 @@ def handle_keys():
                         #Check if its an item, and then pick it up
                         action_result = object.item.pick_up(inventory, objects)
                         #Print out any messages associated with this action
-                        for line, color in action_result:
+                        for success, line, color in action_result:
                             message(line, color)
                         break
             if key_char == 'i':
@@ -316,8 +316,8 @@ def handle_keys():
                 chosen_item = inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
                 if chosen_item is not None:
                     #Get and print out any messages returned by item use
-                    action_result = chosen_item.use(inventory, player)
-                    for line, color in action_result:
+                    action_result = chosen_item.use(inventory, player, objects, fov_map)
+                    for success, line, color in action_result:
                         message(line, color)
 
 
@@ -548,6 +548,7 @@ def setup_items():
         i.append(item.find('type').text)
         i.append(item.find('use').text)
         i.append(item.find('value').text)
+        i.append(item.find('range').text)
         i.append(item.find('character').text)
         i.append(item.find('color-r').text)
         i.append(item.find('color-g').text)
@@ -563,7 +564,7 @@ def setup_items():
     item_appearance_chances = []
 
     for appearing_item in items:
-        item_appearance_chances.append(int(appearing_item[8]))
+        item_appearance_chances.append(int(appearing_item[9]))
 
 #####################################
 # Initialization and Main Loop
@@ -657,6 +658,6 @@ while not libtcod.console_is_window_closed():
             if object.ai:
                messages = object.ai.take_turn(map, fov_map, player, objects)
                if len(messages) > 0:
-                   for line, color in messages:
+                   for success, line, color in messages:
                        message(line, color)
 

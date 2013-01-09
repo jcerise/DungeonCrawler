@@ -4,26 +4,29 @@
                 <type>item</type>
                 <use>cast_heal</use>
                 <value>4</value>
+                <range>0</range>
                 <character>!</character>
                 <color-r>233</color-r>
                 <color-g>191</color-g>
                 <color-b>255</color-b>
-                <encounter-chance>50</encounter-chance>
+                <encounter-chance>40</encounter-chance>
             </item>
             <item name="Medium Healing Potion">
                 <type>item</type>
                 <use>cast_heal</use>
                 <value>8</value>
+                <range>0</range>
                 <character>!</character>
                 <color-r>210</color-r>
                 <color-g>166</color-g>
                 <color-b>115</color-b>
-                <encounter-chance>30</encounter-chance>
+                <encounter-chance>20</encounter-chance>
             </item>
             <item name="Large Healing Potion">
                 <type>item</type>
                 <use>cast_heal</use>
                 <value>16</value>
+                <range>0</range>
                 <character>!</character>
                 <color-r>185</color-r>
                 <color-g>115</color-g>
@@ -34,10 +37,33 @@
                 <type>item</type>
                 <use>cast_heal</use>
                 <value>-10</value>
+                <range>0</range>
                 <character>!</character>
                 <color-r>32</color-r>
                 <color-g>0</color-g>
                 <color-b>64</color-b>
-                <encounter-chance>40</encounter-chance>
+                <encounter-chance>20</encounter-chance>
+            </item>
+            <item name="Scroll of Lightning Bolt">
+                <type>item</type>
+                <use>cast_lightning</use>
+                <value>15</value>
+                <range>5</range>
+                <character>#</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Scroll of Confusion">
+                <type>item</type>
+                <use>cast_confuse</use>
+                <value>10</value>
+                <range>5</range>
+                <character>#</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
             </item>
         </level-zero-items>
