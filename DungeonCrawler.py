@@ -192,7 +192,9 @@ def place_objects(room):
         y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
 
         if not is_blocked(x, y):
-            item_component = Item()
+            #Find the use function for this object, and apply it to the item
+            item_use_function = getattr(Item, 'cast_heal')
+            item_component = Item(use_function = item_use_function)
             item = Object(x, y, '!', 'Small Healing Potion', libtcod.violet, item = item_component)
             objects.append(item)
 
@@ -296,17 +298,19 @@ def handle_keys():
                     if object.x == player.x and  object.y == player.y and object.item:
                         #Check if its an item, and then pick it up
                         action_result = object.item.pick_up(inventory, objects)
-                        #Set the inventory to reflect the pick up action
-                        inventory = action_result[1]
-                        #Set the objects array to reflect the pick up action
-                        objects = action_result[2]
                         #Print out any messages associated with this action
-                        for line, color in action_result[0]:
+                        for line, color in action_result:
                             message(line, color)
                         break
             if key_char == 'i':
                 #Show the inventory
-                inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
+                chosen_item = inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
+                if chosen_item is not None:
+                    #Get and print out any messages returned by item use
+                    action_result = chosen_item.use(inventory, player)
+                    for line, color in action_result:
+                        message(line, color)
+
 
             return 'didnt-take-turn'
 
@@ -373,13 +377,23 @@ def menu(header, options, width):
     libtcod.console_flush()
     key = libtcod.console_wait_for_keypress(True)
 
+    #Convert the ASCII code to an index; if it corresponds to a valid menu item, return it
+    index = key.c - ord('a')
+    if index >= 0 and index < len(options): return index
+    return None
+
 def inventory_menu(header):
     #Show a menu with each item of the inventory as an option
     if len(inventory) == 0:
         options = ['Inventory is empty!']
     else:
         options = [item.name for item in inventory]
+
     index = menu(header, options, INVENTORY_WIDTH)
+
+    #Return the item that was chosen, if any
+    if index is None or len(inventory) == 0: return None
+    return inventory[index].item
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     #Build and render a status bar (health, mana, experience, etc)

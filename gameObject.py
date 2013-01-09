@@ -126,6 +126,12 @@ class Fighter:
             return [[self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!',
                      libtcod.white]]
 
+    def heal(self, amount):
+        #Heal by the given amount, without going over max_hp
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
     def player_death(self, player):
         #The player has died, replace him with a corpse and end the game
         player.set_alive_or_dead(False)
@@ -165,14 +171,45 @@ class BasicMonster:
 
 class Item:
     #Defines an item that can be picked up and used
+    def __init__(self, use_function = None):
+        self.use_function = use_function
+
     def pick_up(self, inventory, objects):
+        #Check if the players inventory is full or not
         if len(inventory) >= 26:
             message = [['Your inventory is full, and you cannot pick up ' + self.owner.name + '.', libtcod.yellow]]
         else:
+            #Add the item to the players inventory, and remove it from the dungeon
             inventory.append(self.owner)
             objects.remove(self.owner)
             message = [["You picked up a " + self.owner.name + '!', libtcod.green]]
 
-        return [message, inventory, objects]
+        return message
+
+    def use(self, inventory, object):
+        #Call the use_function defined on object creation
+        if self.use_function is None:
+            #No usage defined for this item, it cannot be used
+            message = [['The ' + self.owner.name + ' cannot be used at this time.', libtcod.white]]
+        else:
+            messages = self.use_function(self, 5, object)
+            if messages[0] != 'cancelled':
+                #Destroy the object, removing it from the players inventory
+                inventory.remove(self.owner)
+            message = [[messages[1], messages[2]]]
+
+        return message
+
+    def cast_heal(self, amount, object):
+        #Heal the object (player, monster, whatever)
+        if object.fighter.hp == object.fighter.max_hp:
+            message = ['cancelled', 'You are already at full health!', libtcod.red]
+            return message
+
+        message = ['success', 'Your wounds start to feel better!', libtcod.light_violet]
+        object.fighter.heal(amount)
+        return message
+
+
 
 
