@@ -171,7 +171,9 @@ class BasicMonster:
 
 class Item:
     #Defines an item that can be picked up and used
-    def __init__(self, use_function = None):
+    def __init__(self, value = 0, use_function = None):
+        #The value of an item determines how much it does of whatever it does (healing, damage, fatigue restore etc)
+        self.value = value
         self.use_function = use_function
 
     def pick_up(self, inventory, objects):
@@ -192,7 +194,7 @@ class Item:
             #No usage defined for this item, it cannot be used
             message = [['The ' + self.owner.name + ' cannot be used at this time.', libtcod.white]]
         else:
-            messages = self.use_function(self, 5, object)
+            messages = self.use_function(self, self.value, object)
             if messages[0] != 'cancelled':
                 #Destroy the object, removing it from the players inventory
                 inventory.remove(self.owner)
@@ -206,7 +208,12 @@ class Item:
             message = ['cancelled', 'You are already at full health!', libtcod.red]
             return message
 
-        message = ['success', 'Your wounds start to feel better!', libtcod.light_violet]
+        if amount > 0:
+            message = ['success', 'Your wounds start to feel better!', libtcod.light_violet]
+        elif amount < 0:
+            message = ['success', 'Yuck! That item was spoiled! You dont feel very good...', libtcod.sea]
+        else:
+            message = ['success', 'You dont notice any effect...', libtcod.white]
         object.fighter.heal(amount)
         return message
 
