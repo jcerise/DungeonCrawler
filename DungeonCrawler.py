@@ -5,6 +5,13 @@ from gameObject import *
 from tile import Tile
 from rect import Rect
 
+#Object Components
+from objectComponent.fighter import *
+from objectComponent.item import *
+
+#Fighter AIs
+from fighterAi.basic import *
+
 #TODO: Change gameObject to only take base arguments, but have methods that require advanced map objects
 #This will allow for creation of objects before the map has been initialized.
 
