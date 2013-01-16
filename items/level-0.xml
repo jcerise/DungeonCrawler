@@ -66,4 +66,15 @@
                 <color-b>0</color-b>
                 <encounter-chance>80</encounter-chance>
             </item>
+            <item name="Scroll of Enrage Monster">
+                <type>item</type>
+                <use>cast_enrage</use>
+                <value>10</value>
+                <range>5</range>
+                <character>#</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
         </level-zero-items>

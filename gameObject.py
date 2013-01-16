@@ -63,6 +63,19 @@ class Object:
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy **2)
 
+    def closest_fighter(self, objects):
+        #Return the closest object with a fighter component to this object
+        closest_distance = 1000
+        closest_object = None
+        for object in objects:
+            #Search through all objects, ignoring ourself
+            if object.fighter and object != self:
+                distance = self.distance_to(object)
+                if distance < closest_distance:
+                    closest_distance = distance
+                    closest_object = object
+        return closest_object
+
     def draw(self, fov_map, con):
         #Draw the character that represents this object, if its in the players field of view
         if libtcod.map_is_in_fov(fov_map, self.x, self.y):

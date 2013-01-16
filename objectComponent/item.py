@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 from fighterAi.confused import *
+from fighterAi.enraged import *
 
 class Item:
     #Defines an item that can be picked up and used
@@ -66,6 +67,21 @@ class Item:
         message = [['success', 'There is a faint hiss as the spell triggers. The eyes of the ' + enemy.name +
                                ' suddenly look vacant, as if it has forgotten its purpose. It begins to wander' +
                                'aimlessly around...', libtcod.light_green]]
+        return message
+
+    def cast_enrage(self, damage, range, caster, objects, fov_map):
+        enemy = self.closest_enemy(range, caster, objects, fov_map)
+        if enemy is None:
+            message = [['cancelled', 'No enemy is close enough to enrage...', libtcod.red]]
+            return message
+            #Replace the enemies AI with a enraged one. This will revert after a few turns
+        old_ai = enemy.ai
+        enemy.ai = EnragedMonster(old_ai, damage)
+        enemy.ai.owner = enemy
+        message = [['success', 'You feel a faint warming in the air as you read the scroll, as if the temperature' +
+                               ' in the room has increased. Suddenly, the ' + enemy.name + ' tenses up, and lets out' +
+                               ' an angry noise! It begins brutally laying into anything that it lays eyes on!',
+                               libtcod.light_orange]]
         return message
 
     def closest_enemy(self, range, caster, objects, fov_map):

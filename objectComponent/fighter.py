@@ -91,6 +91,6 @@ class Fighter:
         monster.blocks = False
         monster.fighter = None
         monster.ai = None
-        message = ['success', 'You have slain the ' + monster.name.capitalize(), libtcod.orange]
+        message = ['success', 'The ' + monster.name.capitalize() + ' has been slain!', libtcod.orange]
         monster.name = 'Remains of ' + monster.name
         return message
