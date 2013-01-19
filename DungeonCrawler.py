@@ -206,7 +206,7 @@ def place_objects(room):
             item = items[item_choice]
 
             #Find the use function for this object, and apply it to the item
-            item_use_function = getattr(Item, item[2])
+            item_use_function = item[2]
 
             #Create an object and item component from the loaded values
             item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function)
