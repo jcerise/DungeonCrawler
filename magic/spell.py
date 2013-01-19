@@ -54,13 +54,15 @@ class Spell:
         return message
 
     def cast_enrage(self, damage, range, caster, objects, fov_map):
+        #Enrage the target, causing it to attack friend and foe alike
         enemy = self.closest_enemy(range, caster, objects, fov_map)
         if enemy is None:
             message = [['cancelled', 'No enemy is close enough to enrage...', libtcod.red]]
             return message
             #Replace the enemies AI with a enraged one. This will revert after a few turns
         old_ai = enemy.ai
-        enemy.ai = EnragedMonster(old_ai, damage)
+        old_color = enemy.color
+        enemy.ai = EnragedMonster(old_ai, damage, old_color)
         enemy.ai.owner = enemy
         message = [['success', 'You feel a faint warming in the air as you read the scroll, as if the temperature' +
                                ' in the room has increased. Suddenly, the ' + enemy.name + ' tenses up, and lets out' +

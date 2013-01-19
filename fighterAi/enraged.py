@@ -2,12 +2,16 @@ import libtcodpy as libtcod
 
 class EnragedMonster:
     #AI for an enraged object. This object will attack any fighter in sight, not just the player
-    def __init__(self, old_ai, enraged_num_turns):
+    def __init__(self, old_ai, enraged_num_turns, old_color):
         self.old_ai = old_ai
         self.enraged_num_turns = enraged_num_turns
+        self.old_color = old_color
 
-    def take_turn(self, gameMap, fovMap, player, objects):
+    def take_turn(self, gameMap,fov_map, player, objects):
         messages = []
+
+        #Turn the object light red, to indicate that they are seething with raw rage and hatred
+        self.owner.color = libtcod.light_red
 
         if self.enraged_num_turns > 0:
             aiObject = self.owner
@@ -29,6 +33,8 @@ class EnragedMonster:
         else:
             #No longer enraged, revert the AI to what it originally was
             self.owner.ai =self.old_ai
+            #Set the enemy back to their original color
+            self.owner.color = self.old_color
             messages += [['success', 'The ' + self.owner.name + ' is no longer enraged!', libtcod.light_red]]
 
         return messages

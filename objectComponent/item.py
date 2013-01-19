@@ -31,6 +31,7 @@ class Item:
             #No usage defined for this item, it cannot be used
             message = [['The ' + self.owner.name + ' cannot be used at this time.', libtcod.white]]
         else:
+            #Fire up the spell component, and trigger the spell specified on the object
             messages = self.spellComponent.cast_spell(self.use_function, self.value, self.range, object, objects, fov_map)
             if messages[0][0] != 'cancelled':
                 #Destroy the object, removing it from the players inventory
