@@ -57,6 +57,10 @@ class Object:
         blocked = self.is_blocked(self.x + dx, self.y + dy, gameMap, objects)
         self.move(gameMap, dx, dy, blocked)
 
+    def distance(self, x, y):
+        #Return the distance to some coordinates
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def distance_to(self, other):
         #Return the distance to another object
         dx = other.x - self.x

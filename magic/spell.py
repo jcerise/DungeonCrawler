@@ -9,22 +9,22 @@ class Spell:
     def __init__(self, caster):
         self.caster = caster
 
-    def cast_spell(self, spell, value, range, caster, objects, fov_map):
+    def cast_spell(self, spell, value, range, caster, objects, fov_map, x, y):
         #Cast a spell, as specified by the value of spell
         spell_to_cast = getattr(self, spell)
-        message = spell_to_cast(value, range, caster, objects, fov_map)
+        message = spell_to_cast(value, range, caster, objects, fov_map, x, y)
         return message
 
     #####################
     # Spell Definitions
     #####################
 
-    def cast_heal(self, amount, range, caster, objects, fov_map):
+    def cast_heal(self, amount, range, caster, objects, fov_map, x, y):
         #Heal the object (player, monster, whatever)
         message = caster.fighter.heal(amount)
         return message
 
-    def cast_lightning(self, damage, range, caster, objects, fov_map):
+    def cast_lightning(self, damage, range, caster, objects, fov_map, x, y):
         #Cast a lightning bolt at the nearest enemy (player cannot target this spell)
         enemy = self.closest_enemy(range, caster, objects, fov_map)
         if enemy is None:
@@ -39,7 +39,7 @@ class Spell:
         message += [enemy.fighter.take_damage(damage)]
         return message
 
-    def cast_confuse(self, damage, range, caster, objects, fov_map):
+    def cast_confuse(self, damage, range, caster, objects, fov_map, x, y):
         enemy = self.closest_enemy(range, caster, objects, fov_map)
         if enemy is None:
             message = [['cancelled', 'No enemy is close enough to confuse...', libtcod.red]]
@@ -53,7 +53,7 @@ class Spell:
                                'aimlessly around...', libtcod.light_green]]
         return message
 
-    def cast_enrage(self, damage, range, caster, objects, fov_map):
+    def cast_enrage(self, damage, range, caster, objects, fov_map, x, y):
         #Enrage the target, causing it to attack friend and foe alike
         enemy = self.closest_enemy(range, caster, objects, fov_map)
         if enemy is None:
@@ -70,8 +70,26 @@ class Spell:
                     libtcod.light_orange]]
         return message
 
+    def cast_fireball(self, damage, range, caster, objects, fov_map, x, y):
+        if x is None:
+            message = [['cancelled', 'You decided not to bring forth fiery death to your enemies at this time...',
+                        libtcod.red]]
+            return message
+        message = [['success', 'The scroll begins to glow as you read the spell. A small orb of flame emerges in ' +
+                   'the air in front of you. As you finish the incantation, the orb shoots forth, smashing into ' +
+                   'the ground where you had gestured. Flame erupts in all directions, horribly burning ' +
+                   'everything it touches!', libtcod.orange]]
+        for obj in objects:
+            if obj.distance(x, y) <= range and obj.fighter:
+                message.append(['success', obj.name + ' is burned by the fireballs explosion! It takes ' + str(damage) + ' damage.',
+                            libtcod.dark_orange])
+                damage_message = obj.fighter.take_damage(damage)
+                if damage_message is not None:
+                    message.append(damage_message)
+        return message
+
     ######################
-    # Targetting functions
+    # Targeting functions
     ######################
 
     def closest_enemy(self, range, caster, objects, fov_map):
@@ -88,3 +106,6 @@ class Spell:
                     closest_enemy = object
                     closest_dist = dist
         return closest_enemy
+
+
+

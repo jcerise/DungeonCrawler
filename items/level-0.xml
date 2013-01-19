@@ -10,6 +10,7 @@
                 <color-g>191</color-g>
                 <color-b>255</color-b>
                 <encounter-chance>40</encounter-chance>
+                <targeting>self</targeting>
             </item>
             <item name="Medium Healing Potion">
                 <type>item</type>
@@ -21,6 +22,7 @@
                 <color-g>166</color-g>
                 <color-b>115</color-b>
                 <encounter-chance>20</encounter-chance>
+                <targeting>self</targeting>
             </item>
             <item name="Large Healing Potion">
                 <type>item</type>
@@ -32,6 +34,7 @@
                 <color-g>115</color-g>
                 <color-b>255</color-b>
                 <encounter-chance>5</encounter-chance>
+                <targeting>self</targeting>
             </item>
             <item name="Spoiled Healing Potion">
                 <type>item</type>
@@ -43,6 +46,7 @@
                 <color-g>0</color-g>
                 <color-b>64</color-b>
                 <encounter-chance>20</encounter-chance>
+                <targeting>self</targeting>
             </item>
             <item name="Scroll of Lightning Bolt">
                 <type>item</type>
@@ -54,6 +58,7 @@
                 <color-g>255</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>80</encounter-chance>
+                <targeting>closest</targeting>
             </item>
             <item name="Scroll of Confusion">
                 <type>item</type>
@@ -65,6 +70,7 @@
                 <color-g>255</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>80</encounter-chance>
+                <targeting>closest</targeting>
             </item>
             <item name="Scroll of Enrage Monster">
                 <type>item</type>
@@ -76,5 +82,18 @@
                 <color-g>255</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>80</encounter-chance>
+                <targeting>closest</targeting>
+            </item>
+            <item name="Scroll of Fireball">
+                <type>item</type>
+                <use>cast_fireball</use>
+                <value>10</value>
+                <range>3</range>
+                <character>#</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+                <targeting>manual</targeting>
             </item>
         </level-zero-items>

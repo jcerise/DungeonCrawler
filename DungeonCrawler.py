@@ -209,7 +209,8 @@ def place_objects(room):
             item_use_function = item[2]
 
             #Create an object and item component from the loaded values
-            item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function)
+            item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function,
+                                  targeting = item[10])
             item = Object(x, y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
                 item = item_component)
             objects.append(item)
@@ -244,6 +245,27 @@ def is_blocked(x, y):
 
     #There is no object or tile blocking this position
     return False
+
+def target_tile(max_range = None):
+    #Return the coordinates of a tile left clicked in the players FOV (or optionally within a range)
+    global key, mouse
+    while True:
+        #Render the screen, this erases the inventory screen, and shows the names of objects under the mouse
+        libtcod.console_flush()
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        render_all()
+
+        (x, y) = (mouse.cx, mouse.cy)
+
+        if mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y) and \
+           (max_range is None or player.distance(x, y <= max_range)):
+            return (x, y)
+
+        if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
+            #Right click and escape cancel tile selection
+            return (None, None)
+
+
 
 def player_move_or_attack(dx, dy):
     global fov_recompute
@@ -323,7 +345,14 @@ def handle_keys():
                 chosen_item = inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
                 if chosen_item is not None:
                     #Get and print out any messages returned by item use
-                    action_result = chosen_item.use(inventory, player, objects, fov_map)
+
+                    if chosen_item.targeting == 'manual':
+                        message('Left-click a tile to target, or right-click to cancel.', libtcod.light_cyan)
+                        (x, y) = target_tile()
+                    else:
+                        (x, y) = (None, None)
+
+                    action_result = chosen_item.use(inventory, player, objects, fov_map, x, y)
                     for success, line, color in action_result:
                         message(line, color)
 
@@ -561,6 +590,7 @@ def setup_items():
         i.append(item.find('color-g').text)
         i.append(item.find('color-b').text)
         i.append(item.find('encounter-chance').text)
+        i.append(item.find('targeting').text)
 
 
         #Add the newly created monster list to the list of monsters
