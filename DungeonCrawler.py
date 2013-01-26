@@ -1,7 +1,9 @@
 import libtcodpy as libtcod
-import xml.etree.ElementTree as ET
 import textwrap
 from random import randrange
+
+from mapGenerators.standardDungeon import *
+from mapGenerators.cavern import *
 
 from gameObject import *
 from tile import Tile
@@ -59,263 +61,6 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 MAX_ROOM_MONSTERS = 3
 MAX_ROOM_ITEMS = 2
 
-def create_cavern():
-    #Generate a cavern type map using Cellular Automata (similar to game of life). The map is usually free of disjoint
-    #segments (disconnected areas), but not always, and does a good job of making sure there are no large, open areas
-
-    global map
-
-    #First, fill the whole map with floor tiles
-    map = [[Tile(False)
-        for y in range(MAP_HEIGHT) ]
-           for x in range(MAP_WIDTH) ]
-
-    #Next, make roughly 40% of the map wall tiles
-    for x in range(0, len(map)):
-        for y in range(0, len(map[x])):
-            if randrange(0, 100) < 42:
-                map[x][y].blocked = True
-                map[x][y].block_sight = True
-
-    #Now, we make several passes over the map, altering the wall tiles on each pass
-    #If a tile has 5 or more neighbors (one tile away) that are walls, then that tile becomes a wall. If it has two
-    #or fewer walls near (two or fewer tiles away) it, it also becomes a wall (This gets rid of large empty spaces).
-    #If neither of these are true, the tile becomes a floor. This is repeated several times to smooth out the "noise"
-    for _ in range(5):
-        for x in range(0, len(map)):
-            for y in range(0, len(map[x])):
-                wall_count_one_away = count_walls_n_steps_away(map, 1, x, y)
-                wall_count_two_away = count_walls_n_steps_away(map, 2, x, y)
-                tile = map[x][y]
-                if wall_count_one_away >= 5 or wall_count_two_away <= 2:
-                    #This tile becomes a wall
-                    tile.blocked = True
-                    tile.block_sight = True
-                else:
-                    tile.blocked = False
-                    tile.block_sight = False
-
-    #Finally, we make a few more passes to smooth out caverns a little more, and get rid of isolated, single tile walls
-    for _ in range(4):
-        for x in range(0, len(map)):
-            for y in range(0, len(map[x])):
-                wall_count_one_away = count_walls_n_steps_away(map, 1, x, y)
-                tile = map[x][y]
-                if wall_count_one_away >= 5:
-                    #This tile becomes a wall
-                    tile.blocked = True
-                    tile.block_sight = True
-                else:
-                    tile.blocked = False
-                    tile.block_sight = False
-
-
-
-def count_walls_n_steps_away(map, n, x, y):
-    #count the number of wall tiles that are within n tiles of the source tile at (x, y)
-    wall_count = 0
-
-    for r in (-n, 0, n):
-        for c in (-n, 0, n):
-            try:
-                if map[x + r][y + c].is_wall():
-                    wall_count += 1
-            except IndexError:
-                #Check to see if the coordinates are off the map. Off map is considered wall
-                wall_count += 1
-
-    return wall_count
-
-
-def make_map():
-    global map
-    global player_start_x
-    global player_start_y
-
-    #Fill map with blocked tiles, this will allow us to 'carve' rooms for the player
-    #to explore
-    map = [[Tile(True)
-        for y in range(MAP_HEIGHT) ]
-            for x in range(MAP_WIDTH) ]
-
-    rooms = []
-    num_rooms = 0
-
-    for r in range(MAX_ROOMS):
-        #Generate a random width and height for each room
-        w = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-        h = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-
-        #Generate a random map position, inside the bounds of the map
-        x = libtcod.random_get_int(0, 0, MAP_WIDTH - w - 1)
-        y = libtcod.random_get_int(0, 0, MAP_HEIGHT - h -1)
-
-        #Create a new room from the random numbers
-        new_room = Rect(x, y, w, h)
-
-        #Run through all the other rooms and see if they intersect with this one
-        failed = False
-        for other_room in rooms:
-            if new_room.intersect(other_room):
-                failed = True
-                break
-
-        if not failed:
-            #If we've gotten here, the room is valid, and does not intersect any other rooms
-            #Carve the room into the maps tiles
-            create_room(new_room)
-
-            #Get the center coordinates for the new room
-            (new_x, new_y) = new_room.center()
-
-            if num_rooms == 0:
-                #This is the first room created, so start the player off in the center
-                player_start_x = new_x
-                player_start_y = new_y
-            else:
-                #This is not the first room, so connect it to the previous room via tunnels
-
-                #add some contents to this room, such as monsters, objects etc. We never add creatures to the
-                #starting room
-                place_objects(new_room)
-
-                #Get the center coordinates for the previous room
-                (prev_x, prev_y) = rooms[num_rooms - 1].center()
-
-                #Flip a coin to see if we move horizontally, or vertically first
-                if libtcod.random_get_int(0, 0, 1) == 1:
-                    #Tunnel horizontally first, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
-                else:
-                    #Tunnel vertically first, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
-
-            #Finally, append the newly added room to the rooms list
-            rooms.append(new_room)
-            num_rooms += 1
-
-
-def create_room(room):
-    global map
-    #go through each tile in the rectangle and make them passable
-    #range() will exclude the last value in the range, which is perfect,
-    #as we want a one block thick wall surrounding the room
-    for x in range(room.x1, room.x2):
-        for y in range(room.y1, room.y2):
-            map[x][y].blocked = False
-            map[x][y].block_sight = False
-
-def create_h_tunnel(x1, x2, y):
-    #carve a horizontal tunnel from x1 to x2
-    global map
-    for x in range(min(x1, x2), max(x1, x2) + 1):
-        map[x][y].blocked = False
-        map[x][y].block_sight = False
-
-def create_v_tunnel(y1, y2, x):
-    #carve a vertical tunnel from y1 to y2
-    global map
-    for y in range(min(y1, y2), max(y1, y2) + 1):
-        map[x][y].blocked = False
-        map[x][y].block_sight = False
-
-def place_objects(room):
-    global monsters
-    global monster_appearance_chances
-    global items
-    global item_appearance_chances
-
-    #Place Monsters in each room, randomly or course
-    num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
-
-    for i in range(num_monsters):
-        x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
-        y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
-
-        if not is_blocked(x, y):
-            #Choose a monster to spawn from the list of applicable monsters
-            spawn = random_choice_index(monster_appearance_chances)
-
-            #Choose the monster based on the spawn chance
-            monster = monsters[spawn]
-
-            #Create a death function for the monster
-            monster_death = getattr(Fighter, 'monster_death')
-
-            #Create a component for the monster based on the monster type
-            if monster[1] == 'fighter':
-                fighter_component = Fighter(hp = int(monster[3]), defense = int(monster[4]), power = int(monster[5]),
-                    death_function = monster_death)
-
-            #Create an AI component for the monster based on its AI type
-            if monster[2] == 'basic':
-                ai_component = BasicMonster()
-
-            #Finally, create the monster
-            monster = Object(x, y, char = monster[6], name = monster[0], color = libtcod.Color(int(monster[7]),
-                int(monster[8]), int(monster[9])), blocks = True, fighter = fighter_component,  ai = ai_component)
-
-            #Add the monster to the objects array
-            objects.append(monster)
-
-    #Place items in each room, randomly as well
-    num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
-
-    for i in range(num_items):
-        #Create x num_items number of items in this room
-        x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
-        y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
-
-        if not is_blocked(x, y):
-            #Choose an item to create from the list of applicable items
-            item_choice = random_choice_index(item_appearance_chances)
-
-            #Choose the item based on the spawn chance
-            item = items[item_choice]
-
-            #Find the use function for this object, and apply it to the item
-            item_use_function = item[2]
-
-            #Create an object and item component from the loaded values
-            item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function,
-                                  targeting = item[10])
-            item = Object(x, y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
-                item = item_component)
-            objects.append(item)
-
-def random_choice_index(chances):
-    #Choose an option from a list of chances
-    #Roll a die, whcih will land somewhere between 1 and the total of the chances list
-    #Then, we simply need to figure out what range in the list that number falls under
-    dice = libtcod.random_get_int(0, 1, sum(chances))
-
-    running_sum = 0
-    choice = 0
-    #Go through all chances, keeping the total so far
-    for w in chances:
-        running_sum += w
-
-        #Check if the die roll is smaller or equal to the current total.
-        #If it is, we know the chance range the roll fell into
-        if dice <= running_sum:
-            return choice
-        choice += 1
-
-def is_blocked(x, y):
-    #Test the map tile at the coordinates to see if it is blocked or not
-    if map[x][y].blocked:
-        return True
-
-    #Then, check through all objects and see if any of them are blocking
-    for object in objects:
-        if object.blocks and object.x == x and object.y == y:
-            return True
-
-    #There is no object or tile blocking this position
-    return False
-
 def target_tile(max_range = None):
     #Return the coordinates of a tile left clicked in the players FOV (or optionally within a range)
     global key, mouse
@@ -372,14 +117,6 @@ def handle_keys():
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         #ALT + Enter, toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif key.vk == libtcod.KEY_SHIFT and key.lalt:
-        #Redraw the map, and move the player to the first room
-        #Debug and testing purposes only
-        map = []
-        make_map()
-        player.x = player_start_x
-        player.y = player_start_y
-
     elif key.vk == libtcod.KEY_ESCAPE:
         #Escape, exit game
         return 'exit'
@@ -592,87 +329,6 @@ def render_all():
     #Blit the new console for the GUI onto the screen
     libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
 
-def setup_monsters():
-    #Figure out which monsters to include on this level, and load them all
-    #TODO: For each level, the player can encounter monsters from the previous level, as well as the next level
-    #There is a 50% decrease in encounter chances for previous level monsters
-    #There is a 75% decrease in encounter chances for next level monsters
-    #This will keep the chance of difficult monsters a possibility on any level
-
-    global monsters
-    global monster_appearance_chances
-
-    monster_tree = ET.parse('monsters/level-0.xml')
-    monster_root = monster_tree.getroot()
-
-    monsters = []
-
-    #Create a list with all the applicable monsters for this floor
-    for monster in monster_root.findall('monster'):
-        m = []
-        m.append(monster.get('name'))
-        m.append(monster.find('type').text)
-        m.append(monster.find('ai-type').text)
-        m.append(monster.find('hit-points').text)
-        m.append(monster.find('defense').text)
-        m.append(monster.find('attack-power').text)
-        m.append(monster.find('character').text)
-        m.append(monster.find('color-r').text)
-        m.append(monster.find('color-g').text)
-        m.append(monster.find('color-b').text)
-        m.append(monster.find('encounter-chance').text)
-
-        #Add the newly created monster list to the list of monsters
-        monsters.append(m)
-
-    #Next, build a list with just the monster appearance chances, so we can figure out later how often each monster will
-    #show up. The index of the chance in this list directly corresponds to the index of the monster in the monsters list
-    monster_appearance_chances = []
-
-    for appearing_monster in monsters:
-        monster_appearance_chances.append(int(appearing_monster[10]))
-
-def setup_items():
-    #Figure out which items to include on this level, and load them all
-    #TODO: For each level, the player can encounter items from the previous level, as well as the next level
-    #There is a 50% decrease in encounter chances for previous level items
-    #There is a 75% decrease in encounter chances for next level items
-    #This will keep the items semi-random on any level
-
-    global items
-    global item_appearance_chances
-
-    item_tree = ET.parse('items/level-0.xml')
-    item_root = item_tree.getroot()
-
-    items = []
-
-    #Create a list with all the applicable monsters for this floor
-    for item in item_root.findall('item'):
-        i = []
-        i.append(item.get('name'))
-        i.append(item.find('type').text)
-        i.append(item.find('use').text)
-        i.append(item.find('value').text)
-        i.append(item.find('range').text)
-        i.append(item.find('character').text)
-        i.append(item.find('color-r').text)
-        i.append(item.find('color-g').text)
-        i.append(item.find('color-b').text)
-        i.append(item.find('encounter-chance').text)
-        i.append(item.find('targeting').text)
-
-
-        #Add the newly created monster list to the list of monsters
-        items.append(i)
-
-    #Next, build a list with just the item appearance chances, so we can figure out later how often each item will
-    #show up. The index of the chance in this list directly corresponds to the index of the item in the item list
-    item_appearance_chances = []
-
-    for appearing_item in items:
-        item_appearance_chances.append(int(appearing_item[9]))
-
 #####################################
 # Initialization and Main Loop
 ####################################
@@ -693,14 +349,15 @@ libtcod.sys_set_fps(LIMIT_FPS)
 objects = []
 
 #Generate all the monsters for this floor
-setup_monsters()
+#setup_monsters()
 
 #Generate all the items for this floor
-setup_items()
+#setup_items()
 
 #Create the map
-#make_map()
-create_cavern()
+mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE, 0)
+mapObjectCave = Cavern(MAP_WIDTH, MAP_HEIGHT)
+map = mapObjectCave.make_map()
 
 fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
 for y in range(MAP_HEIGHT):
