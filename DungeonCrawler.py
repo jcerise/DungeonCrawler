@@ -60,44 +60,68 @@ MAX_ROOM_MONSTERS = 3
 MAX_ROOM_ITEMS = 2
 
 def create_cavern():
-    global map
-    global player_start_x
-    global player_start_y
+    #Generate a cavern type map using Cellular Automata (similar to game of life). The map is usually free of disjoint
+    #segments (disconnected areas), but not always, and does a good job of making sure there are no large, open areas
 
-    #First up, populate our map with random floor tiles, about 40% of the total area should be floor
-    map = [[Tile(True)
+    global map
+
+    #First, fill the whole map with floor tiles
+    map = [[Tile(False)
         for y in range(MAP_HEIGHT) ]
            for x in range(MAP_WIDTH) ]
 
-    for x in range(1, len(map) - 1):
-        for y in range(1, len(map[x]) - 1):
-            if randrange(100) <= 45:
-                map[x][y].blocked = False
-                map[x][y].block_sight = False
-                player_start_x = x
-                player_start_y = y
-    x = 0
-    while x <= -1:
-        for x in range(1, len(map) - 1):
-            for y in range(1, len(map[x]) - 1):
-                wall_count = count_adjacent_walls(map, x, y)
+    #Next, make roughly 40% of the map wall tiles
+    for x in range(0, len(map)):
+        for y in range(0, len(map[x])):
+            if randrange(0, 100) < 42:
+                map[x][y].blocked = True
+                map[x][y].block_sight = True
+
+    #Now, we make several passes over the map, altering the wall tiles on each pass
+    #If a tile has 5 or more neighbors (one tile away) that are walls, then that tile becomes a wall. If it has two
+    #or fewer walls near (two or fewer tiles away) it, it also becomes a wall (This gets rid of large empty spaces).
+    #If neither of these are true, the tile becomes a floor. This is repeated several times to smooth out the "noise"
+    for _ in range(5):
+        for x in range(0, len(map)):
+            for y in range(0, len(map[x])):
+                wall_count_one_away = count_walls_n_steps_away(map, 1, x, y)
+                wall_count_two_away = count_walls_n_steps_away(map, 2, x, y)
                 tile = map[x][y]
-                if wall_count >= 4:
-                    #This tile has 4 or more neighbors that are walls, and it is also a wall, so it remains a wall
-                    tile.blocked = False
-                    tile.block_sight = False
-                elif wall_count >= 6:
+                if wall_count_one_away >= 5 or wall_count_two_away <= 2:
                     #This tile becomes a wall
                     tile.blocked = True
                     tile.block_sight = True
-        x += 1
+                else:
+                    tile.blocked = False
+                    tile.block_sight = False
 
-def count_adjacent_walls(map, x, y):
+    #Finally, we make a few more passes to smooth out caverns a little more, and get rid of isolated, single tile walls
+    for _ in range(4):
+        for x in range(0, len(map)):
+            for y in range(0, len(map[x])):
+                wall_count_one_away = count_walls_n_steps_away(map, 1, x, y)
+                tile = map[x][y]
+                if wall_count_one_away >= 5:
+                    #This tile becomes a wall
+                    tile.blocked = True
+                    tile.block_sight = True
+                else:
+                    tile.blocked = False
+                    tile.block_sight = False
+
+
+
+def count_walls_n_steps_away(map, n, x, y):
+    #count the number of wall tiles that are within n tiles of the source tile at (x, y)
     wall_count = 0
 
-    for r in (-1, 0, 1):
-        for c in (-1, 0, 1):
-            if map[x + r][y + c].is_wall():
+    for r in (-n, 0, n):
+        for c in (-n, 0, n):
+            try:
+                if map[x + r][y + c].is_wall():
+                    wall_count += 1
+            except IndexError:
+                #Check to see if the coordinates are off the map. Off map is considered wall
                 wall_count += 1
 
     return wall_count
@@ -689,8 +713,8 @@ player_death = getattr(Fighter, 'player_death')
 fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
 player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
     fighter = fighter_component)
-player.x = player_start_x
-player.y = player_start_y
+player.x = 1
+player.y = 1
 
 #Add the player to the objects array, which will be drawn to the screen
 objects.insert(0, player)
