@@ -7,8 +7,20 @@ class Tile:
         self.blocked = blocked
 
         #All tiles start out unexplored
-        self.explored = False
+        self.explored = True
 
         #By default, if a tile is blocked, it also blocks sight
         if block_sight is None: block_sight = blocked
         self.block_sight = block_sight
+
+    def is_wall(self):
+        #Check if this tile is a wall (blocks sight and movement)
+        if self.blocked and self.block_sight:
+            return True
+
+    def is_chasm(self):
+        #Check if this tile is a chasm (blocks movement, but not sight
+        if self.blocked and  not self.block_sight:
+            return True
+
+

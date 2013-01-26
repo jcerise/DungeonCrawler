@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 import xml.etree.ElementTree as ET
 import textwrap
+from random import randrange
+
 from gameObject import *
 from tile import Tile
 from rect import Rect
@@ -56,6 +58,50 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 #Monster and object settings
 MAX_ROOM_MONSTERS = 3
 MAX_ROOM_ITEMS = 2
+
+def create_cavern():
+    global map
+    global player_start_x
+    global player_start_y
+
+    #First up, populate our map with random floor tiles, about 40% of the total area should be floor
+    map = [[Tile(True)
+        for y in range(MAP_HEIGHT) ]
+           for x in range(MAP_WIDTH) ]
+
+    for x in range(1, len(map) - 1):
+        for y in range(1, len(map[x]) - 1):
+            if randrange(100) <= 45:
+                map[x][y].blocked = False
+                map[x][y].block_sight = False
+                player_start_x = x
+                player_start_y = y
+    x = 0
+    while x <= -1:
+        for x in range(1, len(map) - 1):
+            for y in range(1, len(map[x]) - 1):
+                wall_count = count_adjacent_walls(map, x, y)
+                tile = map[x][y]
+                if wall_count >= 4:
+                    #This tile has 4 or more neighbors that are walls, and it is also a wall, so it remains a wall
+                    tile.blocked = False
+                    tile.block_sight = False
+                elif wall_count >= 6:
+                    #This tile becomes a wall
+                    tile.blocked = True
+                    tile.block_sight = True
+        x += 1
+
+def count_adjacent_walls(map, x, y):
+    wall_count = 0
+
+    for r in (-1, 0, 1):
+        for c in (-1, 0, 1):
+            if map[x + r][y + c].is_wall():
+                wall_count += 1
+
+    return wall_count
+
 
 def make_map():
     global map
@@ -629,7 +675,8 @@ setup_monsters()
 setup_items()
 
 #Create the map
-make_map()
+#make_map()
+create_cavern()
 
 fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
 for y in range(MAP_HEIGHT):
