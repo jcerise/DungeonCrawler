@@ -3,13 +3,10 @@ import xml.etree.ElementTree as ET
 
 class AbstractMapGenerator():
 
-    def make_map(self):
+    def setup_map(self):
         raise NotImplementedError
 
     def place_objects(self):
-        raise NotImplementedError
-
-    def place_player(self):
         raise NotImplementedError
 
     def random_choice_index(self, chances):
@@ -30,7 +27,7 @@ class AbstractMapGenerator():
                 return choice
             choice += 1
 
-    def is_blocked(self, objects, x, y):
+    def is_blocked(self, map, objects, x, y):
         #Test the map tile at the coordinates to see if it is blocked or not
         if map[x][y].blocked:
             return True
@@ -49,9 +46,6 @@ class AbstractMapGenerator():
         #There is a 50% decrease in encounter chances for previous level monsters
         #There is a 75% decrease in encounter chances for next level monsters
         #This will keep the chance of difficult monsters a possibility on any level
-
-        global monsters
-        global monster_appearance_chances
 
         monster_tree = ET.parse('monsters/level-0.xml')
         monster_root = monster_tree.getroot()
@@ -83,15 +77,14 @@ class AbstractMapGenerator():
         for appearing_monster in monsters:
             monster_appearance_chances.append(int(appearing_monster[10]))
 
+        return (monsters, monster_appearance_chances)
+
     def setup_items(self):
         #Figure out which items to include on this level, and load them all
         #TODO: For each level, the player can encounter items from the previous level, as well as the next level
         #There is a 50% decrease in encounter chances for previous level items
         #There is a 75% decrease in encounter chances for next level items
         #This will keep the items semi-random on any level
-
-        global items
-        global item_appearance_chances
 
         item_tree = ET.parse('items/level-0.xml')
         item_root = item_tree.getroot()
@@ -123,4 +116,6 @@ class AbstractMapGenerator():
 
         for appearing_item in items:
             item_appearance_chances.append(int(appearing_item[9]))
+
+        return (items, item_appearance_chances)
 

@@ -7,7 +7,7 @@ class Tile:
         self.blocked = blocked
 
         #All tiles start out unexplored
-        self.explored = True
+        self.explored = False
 
         #By default, if a tile is blocked, it also blocks sight
         if block_sight is None: block_sight = blocked

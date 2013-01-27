@@ -2,12 +2,18 @@ from random import randrange
 from abstractMapGenerator import *
 from tile import *
 
-
 class Cavern(AbstractMapGenerator):
 
-    def __init__(self, width, height):
+    #TODO Implement place_objects for this map type. Probably will just be random placement, as there are no rooms
+
+    def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, max_items):
         self.width = width
         self.height = height
+
+        #Create lists of items and monsters based on the current dungeon level
+        #These are added into the objects array
+        (self.monsters, self.monster_appearance_chances) = self.setup_monsters()
+        (self.items, self.item_appearance_chances) = self.setup_items()
 
         #First, fill the whole map with floor tiles
         self.map = [[Tile(False)
@@ -15,7 +21,7 @@ class Cavern(AbstractMapGenerator):
                for x in range(self.width) ]
 
 
-    def make_map(self):
+    def setup_map(self):
         #Generate a cavern type map using Cellular Automata (similar to game of life). The map is usually free of disjoint
         #segments (disconnected areas), but not always, and does a good job of making sure there are no large, open area
 
@@ -58,7 +64,8 @@ class Cavern(AbstractMapGenerator):
                         tile.blocked = False
                         tile.block_sight = False
 
-        return self.map
+        #TODO Calculate player start coordinates
+        return (self.map, self.objects, self.player_start_x, self.player_start_y)
 
 
 

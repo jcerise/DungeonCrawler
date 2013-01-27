@@ -61,6 +61,19 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 MAX_ROOM_MONSTERS = 3
 MAX_ROOM_ITEMS = 2
 
+def is_blocked(x, y):
+    #Test the map tile at the coordinates to see if it is blocked or not
+    if map[x][y].blocked:
+        return True
+
+    #Then, check through all objects and see if any of them are blocking
+    for object in objects:
+        if object.blocks and object.x == x and object.y == y:
+            return True
+
+    #There is no object or tile blocking this position
+    return False
+
 def target_tile(max_range = None):
     #Return the coordinates of a tile left clicked in the players FOV (or optionally within a range)
     global key, mouse
@@ -345,19 +358,12 @@ con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 libtcod.sys_set_fps(LIMIT_FPS)
 
-#Initialize the objects array
-objects = []
-
-#Generate all the monsters for this floor
-#setup_monsters()
-
-#Generate all the items for this floor
-#setup_items()
-
-#Create the map
-mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE, 0)
-mapObjectCave = Cavern(MAP_WIDTH, MAP_HEIGHT)
-map = mapObjectCave.make_map()
+#Create the map object, based on what type of map we need for this floor
+mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+    MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+#Use the map object to generate the map array, placing all monsters and items in the process
+#This will return the map array, the objects array, and the start coordinates for the player
+(map, objects, player_start_x, player_start_y) = mapObject.setup_map()
 
 fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
 for y in range(MAP_HEIGHT):
@@ -370,8 +376,8 @@ player_death = getattr(Fighter, 'player_death')
 fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
 player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
     fighter = fighter_component)
-player.x = 1
-player.y = 1
+player.x = player_start_x
+player.y = player_start_y
 
 #Add the player to the objects array, which will be drawn to the screen
 objects.insert(0, player)

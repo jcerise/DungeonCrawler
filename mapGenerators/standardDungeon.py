@@ -2,16 +2,32 @@ from tile import *
 import libtcodpy as libtcod
 from rect import Rect
 from abstractMapGenerator import *
+from gameObject import *
+
+#Objerct components
+from objectComponent.fighter import *
+from objectComponent.item import *
+
+#Object AIs
+from fighterAi.basic import *
 
 class StandardDungeon(AbstractMapGenerator):
 
-    def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, ):
+    def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, max_items):
         self.width = width
         self.height = height
         self.max_rooms = max_rooms
         self.min_room_size = min_room_size
         self.max_room_size = max_room_size
         self.max_monsters = max_monsters
+        self.max_items = max_items
+
+        self.objects = []
+
+        #Create lists of items and monsters based on the current dungeon level
+        #These are added into the objects array
+        (self.monsters, self.monster_appearance_chances) = self.setup_monsters()
+        (self.items, self.item_appearance_chances) = self.setup_items()
 
         #Fill map with blocked tiles, this will allow us to 'carve' rooms for the player
         #to explore
@@ -19,8 +35,8 @@ class StandardDungeon(AbstractMapGenerator):
                         for y in range(self.height) ]
                             for x in range(self.width) ]
 
-    def make_map(self):
-
+    def setup_map(self):
+        #Create the map, add objects and monsters, and save it all for later use
         rooms = []
         num_rooms = 0
 
@@ -60,7 +76,7 @@ class StandardDungeon(AbstractMapGenerator):
 
                     #add some contents to this room, such as monsters, objects etc. We never add creatures to the
                     #starting room
-                    #self.place_objects(new_room)
+                    self.place_objects(new_room)
 
                     #Get the center coordinates for the previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()
@@ -79,23 +95,22 @@ class StandardDungeon(AbstractMapGenerator):
                 rooms.append(new_room)
                 num_rooms += 1
 
-        return self.map
+        return (self.map, self.objects, player_start_x, player_start_y)
 
     def place_objects(self, room):
-
-        #Place Monsters in each room, randomly or course
+        #Place Monsters in each room, randomly of course
         num_monsters = libtcod.random_get_int(0, 0, self.max_monsters)
 
         for i in range(num_monsters):
             x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
             y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
 
-            if not self.is_blocked(x, y):
+            if not self.is_blocked(self.map, self.objects, x, y):
                 #Choose a monster to spawn from the list of applicable monsters
-                spawn = self.random_choice_index(monster_appearance_chances)
+                spawn = self.random_choice_index(self.monster_appearance_chances)
 
                 #Choose the monster based on the spawn chance
-                monster = monsters[spawn]
+                monster = self.monsters[spawn]
 
                 #Create a death function for the monster
                 monster_death = getattr(Fighter, 'monster_death')
@@ -114,22 +129,22 @@ class StandardDungeon(AbstractMapGenerator):
                     int(monster[8]), int(monster[9])), blocks = True, fighter = fighter_component,  ai = ai_component)
 
                 #Add the monster to the objects array
-                objects.append(monster)
+                self.objects.append(monster)
 
         #Place items in each room, randomly as well
-        num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
+        num_items = libtcod.random_get_int(0, 0, self.max_items)
 
         for i in range(num_items):
             #Create x num_items number of items in this room
             x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
             y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
 
-            if not is_blocked(x, y):
+            if not self.is_blocked(self.map, self.objects, x, y):
                 #Choose an item to create from the list of applicable items
-                item_choice = random_choice_index(item_appearance_chances)
+                item_choice = self.random_choice_index(self.item_appearance_chances)
 
                 #Choose the item based on the spawn chance
-                item = items[item_choice]
+                item = self.items[item_choice]
 
                 #Find the use function for this object, and apply it to the item
                 item_use_function = item[2]
@@ -139,7 +154,7 @@ class StandardDungeon(AbstractMapGenerator):
                     targeting = item[10])
                 item = Object(x, y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
                     item = item_component)
-                objects.append(item)
+                self.objects.append(item)
 
     def create_room(self, room):
         #go through each tile in the rectangle and make them passable
