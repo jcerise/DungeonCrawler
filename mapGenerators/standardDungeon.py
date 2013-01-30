@@ -31,7 +31,7 @@ class StandardDungeon(AbstractMapGenerator):
 
         #Fill map with blocked tiles, this will allow us to 'carve' rooms for the player
         #to explore
-        self.map = [[Tile(True)
+        self.map = [[Tile(x, y, True)
                         for y in range(self.height) ]
                             for x in range(self.width) ]
 
