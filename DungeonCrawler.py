@@ -359,8 +359,16 @@ con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 libtcod.sys_set_fps(LIMIT_FPS)
 
 #Create the map object, based on what type of map we need for this floor
-mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-    MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+
+#Choose a map type at random. This is temporary, until I get floors and progression built in
+map_chance = randrange(0, 2)
+if map_chance == 0:
+    mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+        MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+else:
+    mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+        MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+
 #Use the map object to generate the map array, placing all monsters and items in the process
 #This will return the map array, the objects array, and the start coordinates for the player
 (map, objects, player_start_x, player_start_y) = mapObject.setup_map()

@@ -1,6 +1,10 @@
 from random import randrange
 from abstractMapGenerator import *
 from tile import *
+from objectComponent.fighter import *
+from objectComponent.item import *
+from gameObject import *
+from fighterAi.basic import *
 
 class Cavern(AbstractMapGenerator):
 
@@ -9,6 +13,8 @@ class Cavern(AbstractMapGenerator):
     def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, max_items):
         self.width = width
         self.height = height
+
+        self.objects = []
 
         #Create lists of items and monsters based on the current dungeon level
         #These are added into the objects array
@@ -71,6 +77,15 @@ class Cavern(AbstractMapGenerator):
         #areas not connected to any other cavern (separated by wall segments)
         caverns = []
 
+        #Before we do anything else, we need to seal up the edges of the map, so the player cannot wander out into
+        #nothingness. We do this by walking around the edges of the map and making them all wall
+        for x in range(self.width):
+            for y in range(self.height):
+                if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1:
+                    self.map[x][y].block_sight = True
+                    self.map[x][y].blocked = True
+
+        #Now, begin looping through the map, looking for individual caverns
         for x in range(self.width):
             for y in range(self.height):
                 #Grab the tile at the current coordinates
@@ -131,10 +146,66 @@ class Cavern(AbstractMapGenerator):
         random_tile = main_cave[randrange(0, len(main_cave))]
         (self.player_start_x, self.player_start_y) = (random_tile.x, random_tile.y)
 
+        #Populate the cavern with some objects
+        self.place_objects(main_cave)
 
-        #TODO Generate Object placement
-        self.objects = []
         return (self.map, self.objects, self.player_start_x, self.player_start_y)
+
+    def place_objects(self, cave):
+        #Loop through all tiles in our main cavern, and based on a small chance, randomly place either an item or a
+        #monster on the tile
+        for tile in cave:
+            chance = randrange(0, 100)
+            #Roughly a 2 percent chance of an object (monster or item) spawning on this tile
+            if chance <= 1:
+                #Place an object on this tile
+                object_type = randrange(0, 100)
+                if object_type <= 30:
+                    #place an item
+                    if not self.is_blocked(self.map, self.objects, tile.x, tile.y):
+                        #Choose an item to create from the list of applicable items
+                        item_choice = self.random_choice_index(self.item_appearance_chances)
+
+                        #Choose the item based on the spawn chance
+                        item = self.items[item_choice]
+
+                        #Find the use function for this object, and apply it to the item
+                        item_use_function = item[2]
+
+                        #Create an object and item component from the loaded values
+                        item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function,
+                            targeting = item[10])
+                        item = Object(tile.x, tile.y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
+                            item = item_component)
+                        self.objects.append(item)
+                else:
+                    #Place a monster
+                    if not self.is_blocked(self.map, self.objects, tile.x, tile.y):
+                        #Choose a monster to spawn from the list of applicable monsters
+                        spawn = self.random_choice_index(self.monster_appearance_chances)
+
+                        #Choose the monster based on the spawn chance
+                        monster = self.monsters[spawn]
+
+                        #Create a death function for the monster
+                        monster_death = getattr(Fighter, 'monster_death')
+
+                        #Create a component for the monster based on the monster type
+                        if monster[1] == 'fighter':
+                            fighter_component = Fighter(hp = int(monster[3]), defense = int(monster[4]), power = int(monster[5]),
+                                death_function = monster_death)
+
+                        #Create an AI component for the monster based on its AI type
+                        if monster[2] == 'basic':
+                            ai_component = BasicMonster()
+
+                        #Finally, create the monster
+                        monster = Object(tile.x, tile.y, char = monster[6], name = monster[0], color = libtcod.Color(int(monster[7]),
+                            int(monster[8]), int(monster[9])), blocks = True, fighter = fighter_component,  ai = ai_component)
+
+                        #Add the monster to the objects array
+                        self.objects.append(monster)
+
 
     def count_walls_n_steps_away(self, map, n, x, y):
         #count the number of wall tiles that are within n tiles of the source tile at (x, y)
