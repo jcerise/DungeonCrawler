@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import textwrap
+import shelve
 from random import randrange
 
 from mapGenerators.standardDungeon import *
@@ -421,6 +422,18 @@ def new_game():
     #Add a welcome message
     message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
 
+def save_game():
+    global objects, map, inventory, game_msgs, game_state
+    #Create a new, empty shelf to write the game data to, possibly overwriting an old save
+    file = shelve.open('savegame', 'c')
+    file['map'] = map
+    file['objects'] = objects
+    file['player_index'] = objects.index(player)
+    file['inventory'] = inventory
+    file['game_msgs'] = game_msgs
+    file['game_state'] = game_state
+    file.close()
+
 def initialize_fov():
     #When starting a new game, make sure we completely clear the console of other parts of previous games
     libtcod.console_clear(con)
@@ -459,6 +472,7 @@ def play_game():
         #we process the key press accordingly
         player_action = handle_keys()
         if player_action == 'exit':
+            save_game()
             break
 
         player_alive = player.check_if_dead()
