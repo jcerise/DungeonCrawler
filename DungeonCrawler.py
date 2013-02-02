@@ -342,6 +342,102 @@ def render_all():
     #Blit the new console for the GUI onto the screen
     libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
 
+
+def new_game():
+    #Initialize all the components needed to start up a new game
+    global player, map, objects, game_msgs, game_state, inventory
+
+    #Create the map object, based on what type of map we need for this floor
+    #Choose a map type at random. This is temporary, until I get floors and progression built in
+    map_chance = randrange(0, 2)
+    if map_chance == 0:
+        mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+    else:
+        mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+
+    #Use the map object to generate the map array, placing all monsters and items in the process
+    #This will return the map array, the objects array, and the start coordinates for the player
+    (map, objects, player_start_x, player_start_y) = mapObject.setup_map()
+
+    #Initialize the field of view
+    initialize_fov()
+
+    #Create our objects, in this case just a player, then add them to the objects array
+    #Create a fighter component for the player. The player does not need an AI
+    player_death = getattr(Fighter, 'player_death')
+    fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
+    player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
+        fighter = fighter_component)
+    player.x = player_start_x
+    player.y = player_start_y
+
+    #Add the player to the objects array, which will be drawn to the screen
+    objects.insert(0, player)
+
+    #Initialize the players inventory, empty of course
+    inventory = []
+
+    game_state = 'playing'
+
+    #Create an empty list for game messages
+    game_msgs = []
+
+    #Add a welcome message
+    message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
+
+def initialize_fov():
+    #Set up the FOV map
+    global fov_recompute, fov_map
+    fov_recompute = True
+
+    fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
+
+def play_game():
+    #Start up the main game loop so the game can begin playing
+    global key, mouse, game_state
+
+    player_action = None
+
+    mouse = libtcod.Mouse()
+    key = libtcod.Key()
+
+    while not libtcod.console_is_window_closed():
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+
+        #Render the map, and all objects
+        render_all()
+
+        libtcod.console_flush()
+
+        #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
+        for object in objects:
+            object.clear(con)
+
+        #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
+        #we process the key press accordingly
+        player_action = handle_keys()
+        if player_action == 'exit':
+            break
+
+        player_alive = player.check_if_dead()
+        if not player_alive:
+            game_state = 'dead'
+
+        #Let the monsters take their turn
+        if game_state == 'playing' and player_action != 'didnt-take-turn':
+            for object in objects:
+                if object.ai:
+                    messages = object.ai.take_turn(map, fov_map, player, objects)
+                    if len(messages) > 0:
+                        for success, line, color in messages:
+                            message(line, color)
+
+
 #####################################
 # Initialization and Main Loop
 ####################################
@@ -358,85 +454,17 @@ con = libtcod.console_new(MAP_WIDTH, MAP_HEIGHT)
 #Use this line to limit the FPS of the game, since ours is turn-based, this will have no effect
 libtcod.sys_set_fps(LIMIT_FPS)
 
-#Create the map object, based on what type of map we need for this floor
-
-#Choose a map type at random. This is temporary, until I get floors and progression built in
-map_chance = randrange(0, 2)
-if map_chance == 0:
-    mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-        MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
-else:
-    mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-        MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
-
-#Use the map object to generate the map array, placing all monsters and items in the process
-#This will return the map array, the objects array, and the start coordinates for the player
-(map, objects, player_start_x, player_start_y) = mapObject.setup_map()
-
-fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
-for y in range(MAP_HEIGHT):
-    for x in range(MAP_WIDTH):
-        libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
-
-#Create our objects, in this case just a player, then add them to the objects array
-#Create a fighter component for the player. The player does not need an AI
-player_death = getattr(Fighter, 'player_death')
-fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
-player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
-    fighter = fighter_component)
-player.x = player_start_x
-player.y = player_start_y
-
-#Add the player to the objects array, which will be drawn to the screen
-objects.insert(0, player)
-
-game_state = 'playing'
-player_action = None
-fov_recompute = True
-
 #Create a panel for the GUI
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
-#Create an empty list for game messages
-game_msgs = []
+#Setup all necessary items for a new game
+new_game()
 
-#Add a welcome message
-message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
+#start up the main game loop
+play_game()
 
-mouse = libtcod.Mouse()
-key = libtcod.Key()
 
-#Initialize the players inventory, empty of course
-inventory = []
 
-while not libtcod.console_is_window_closed():
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
-    #Render the map, and all objects
-    render_all()
 
-    libtcod.console_flush()
-
-    #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
-    for object in objects:
-        object.clear(con)
-
-    #Decide what to do. If the escape key is pressed, handle_keys returns true, and we exit the game, otherwise,
-    #we process the key press accordingly
-    player_action = handle_keys()
-    if player_action == 'exit':
-        break
-
-    player_alive = player.check_if_dead()
-    if not player_alive:
-        game_state = 'dead'
-
-    #Let the monsters take their turn
-    if game_state == 'playing' and player_action != 'didnt-take-turn':
-        for object in objects:
-            if object.ai:
-               messages = object.ai.take_turn(map, fov_map, player, objects)
-               if len(messages) > 0:
-                   for success, line, color in messages:
-                       message(line, color)
 
