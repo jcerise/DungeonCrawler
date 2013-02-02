@@ -214,6 +214,8 @@ def menu(header, options, width):
     #implicitly calculate the height of the window, based on the header height (after word wrap) and the number
     # of options
     header_height = libtcod.console_get_height_rect(con, 0, 0, width, SCREEN_HEIGHT, header)
+    if header == '':
+        header_height = 0
     height = len(options) + header_height
 
     #Create an offscreen console that represents the menus window
@@ -242,10 +244,42 @@ def menu(header, options, width):
     libtcod.console_flush()
     key = libtcod.console_wait_for_keypress(True)
 
+    #Check for fullscreen keys
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        #ALT + Enter, toggle fullscreen
+        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+
     #Convert the ASCII code to an index; if it corresponds to a valid menu item, return it
     index = key.c - ord('a')
     if index >= 0 and index < len(options): return index
     return None
+
+def main_menu():
+    #Set up the main menu, which is presented to the player when they first load the game
+    img = libtcod.image_load('images/menu_background1.png')
+
+    while not libtcod.console_is_window_closed():
+        #Show the image at twice its usual resolution of the console
+        libtcod.image_blit_2x(img, 0, 0, 0)
+
+        #Show the games title, and some credits
+        libtcod.console_set_default_foreground(0, libtcod.light_yellow)
+        libtcod.console_print_ex(0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 4, libtcod.BKGND_NONE, libtcod.CENTER,
+            'DUNGEONCRAWLER')
+        libtcod.console_print_ex(0, SCREEN_WIDTH / 2, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER,
+            'By Jeremy Cerise')
+
+        #Show menu options and wait for the players choice
+        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+
+        if choice == 0:
+            #Start a new game
+            new_game()
+            play_game()
+        elif choice == 2:
+            #Exit the program
+            break;
+
 
 def inventory_menu(header):
     #Show a menu with each item of the inventory as an option
@@ -388,6 +422,9 @@ def new_game():
     message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
 
 def initialize_fov():
+    #When starting a new game, make sure we completely clear the console of other parts of previous games
+    libtcod.console_clear(con)
+
     #Set up the FOV map
     global fov_recompute, fov_map
     fov_recompute = True
@@ -457,11 +494,8 @@ libtcod.sys_set_fps(LIMIT_FPS)
 #Create a panel for the GUI
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
-#Setup all necessary items for a new game
-new_game()
-
-#start up the main game loop
-play_game()
+#Present the player with the main menu
+main_menu()
 
 
 
