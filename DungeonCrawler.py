@@ -277,10 +277,19 @@ def main_menu():
             #Start a new game
             new_game()
             play_game()
+        elif choice == 1:
+            try:
+                load_game()
+            except:
+                msgbox('\n No saved game to load!\n', 24)
         elif choice == 2:
             #Exit the program
             break;
 
+
+def msgbox(text, width = 50):
+    #Create a menu as quick and dirty message box
+    menu(text, [], width)
 
 def inventory_menu(header):
     #Show a menu with each item of the inventory as an option
@@ -402,7 +411,7 @@ def new_game():
     #Create our objects, in this case just a player, then add them to the objects array
     #Create a fighter component for the player. The player does not need an AI
     player_death = getattr(Fighter, 'player_death')
-    fighter_component = Fighter(hp = 30, defense = 2, power = 5, death_function = player_death)
+    fighter_component = Fighter(hp = 30, defense = 2, power = 5, is_player = True, death_function = player_death)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
         fighter = fighter_component)
     player.x = player_start_x
@@ -433,6 +442,22 @@ def save_game():
     file['game_msgs'] = game_msgs
     file['game_state'] = game_state
     file.close()
+
+def load_game():
+    #Open a previously saved shelve and load the game data
+    global objects, map, inventory, game_msgs, game_state, player
+    file = shelve.open('savegame', 'r')
+    map = file['map']
+    objects = file['objects']
+    player = objects[file['player_index']]
+    game_msgs = file['game_msgs']
+    game_state = file['game_state']
+    file.close()
+
+    initialize_fov()
+
+    play_game()
+
 
 def initialize_fov():
     #When starting a new game, make sure we completely clear the console of other parts of previous games

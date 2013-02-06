@@ -6,12 +6,25 @@ class Fighter:
     #or an NPC.
     #Each action method (take_damage, attack, etc, returns a list of messages that will be printed to the console,
     #so the player knows whats going on. Each message has a color associated with it
-    def __init__(self, hp, defense, power, death_function = None):
+    def __init__(self, hp, defense, power, is_player = False, death_function = None):
         self.hp = hp
         self.max_hp = hp
         self.defense = defense
         self.power = power
         self.death_function = death_function
+        self.is_player = is_player
+
+    def __getstate__(self):
+        result = self.__dict__.copy()
+        del result['death_function']
+        return result
+
+    def __setstate__(self, dict):
+        self.__dict__ = dict
+        if self.is_player:
+            self.__dict__['death_function'] = getattr(Fighter, 'player_death')
+        else:
+            self.__dict__['death_function'] = getattr(Fighter, 'monster_death')
 
     def take_damage(self, damage):
         #apply damage if possible
