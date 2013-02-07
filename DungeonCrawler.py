@@ -449,6 +449,7 @@ def load_game():
     file = shelve.open('savegame', 'r')
     map = file['map']
     objects = file['objects']
+    inventory = file['inventory']
     player = objects[file['player_index']]
     game_msgs = file['game_msgs']
     game_state = file['game_state']
