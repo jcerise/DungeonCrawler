@@ -127,6 +127,7 @@ def handle_keys():
     global key
     global inventory
     global objects
+    global stairs_down
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         #ALT + Enter, toggle fullscreen
@@ -177,6 +178,10 @@ def handle_keys():
                     for success, line, color in action_result:
                         message(line, color)
 
+            if key_char == '>':
+                #Go down the stairs, but first check to ensure the player is standing directly on top of them
+                if stairs_down.x == player.x and stairs_down.y == player.y:
+                    next_level()
 
             return 'didnt-take-turn'
 
@@ -327,6 +332,7 @@ def render_all():
     global color_dark_ground, color_light_ground
     global fov_recompute
     global con
+    global dungeon_level
 
     if fov_recompute:
         #Recompute the Field of view (Player movement, door opened, etc)
@@ -372,6 +378,8 @@ def render_all():
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_red)
 
+    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(dungeon_level))
+
     #Display the names of objects under the mouse
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse())
@@ -389,7 +397,10 @@ def render_all():
 
 def new_game():
     #Initialize all the components needed to start up a new game
-    global player, map, objects, game_msgs, game_state, inventory
+    global player, map, objects, game_msgs, game_state, inventory, stairs_down, dungeon_level
+
+    #Set the dungeon level at one. This will be incremented as the player advances
+    dungeon_level = 1
 
     #Create the map object, based on what type of map we need for this floor
     #Choose a map type at random. This is temporary, until I get floors and progression built in
@@ -403,7 +414,7 @@ def new_game():
 
     #Use the map object to generate the map array, placing all monsters and items in the process
     #This will return the map array, the objects array, and the start coordinates for the player
-    (map, objects, player_start_x, player_start_y) = mapObject.setup_map()
+    (map, objects, player_start_x, player_start_y, stairs_down) = mapObject.setup_map()
 
     #Initialize the field of view
     initialize_fov()
@@ -431,8 +442,39 @@ def new_game():
     #Add a welcome message
     message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
 
+def next_level():
+    #Advance the player to the next level in the dungeon
+    global dungeon_level, map, objects, player, stairs_down
+
+    message('You head down a winding passage, travelling deeper into the depths of the dungeon...')
+
+    #Create the map object, based on what type of map we need for this floor
+    #Choose a map type at random. This is temporary, until I get floors and progression built in
+    map_chance = randrange(0, 2)
+    if map_chance == 0:
+        mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+    else:
+        mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+
+    #Use the map object to generate the map array, placing all monsters and items in the process
+    #This will return the map array, the objects array, and the start coordinates for the player
+    (map, objects, player_start_x, player_start_y, stairs_down) = mapObject.setup_map()
+
+    #Since we had to recreate the objects list, we need to re-add the player, with its new starting coordinates
+    player.x = player_start_x
+    player.y = player_start_y
+    objects.insert(0, player)
+
+    #Initialize the field of view
+    initialize_fov()
+
+    #Keep track of how many levels down the player is
+    dungeon_level += 1
+
 def save_game():
-    global objects, map, inventory, game_msgs, game_state
+    global objects, map, inventory, game_msgs, game_state, stairs_down, dungeon_level
     #Create a new, empty shelf to write the game data to, possibly overwriting an old save
     file = shelve.open('savegame', 'c')
     file['map'] = map
@@ -441,11 +483,13 @@ def save_game():
     file['inventory'] = inventory
     file['game_msgs'] = game_msgs
     file['game_state'] = game_state
+    file['stairs_down_index'] = objects.index(stairs_down)
+    file['dungeon_level'] = dungeon_level
     file.close()
 
 def load_game():
     #Open a previously saved shelve and load the game data
-    global objects, map, inventory, game_msgs, game_state, player
+    global objects, map, inventory, game_msgs, game_state, player, stairs_down, dungeon_level
     file = shelve.open('savegame', 'r')
     map = file['map']
     objects = file['objects']
@@ -453,6 +497,8 @@ def load_game():
     player = objects[file['player_index']]
     game_msgs = file['game_msgs']
     game_state = file['game_state']
+    stairs_down = objects[file['stairs_down_index']]
+    dungeon_level = file['dungeon_level']
     file.close()
 
     initialize_fov()

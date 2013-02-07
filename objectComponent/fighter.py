@@ -15,11 +15,13 @@ class Fighter:
         self.is_player = is_player
 
     def __getstate__(self):
+        #We need to remove the death function call, as it creates an instance method exception when pickling
         result = self.__dict__.copy()
         del result['death_function']
         return result
 
     def __setstate__(self, dict):
+        #We need to re-add the death function upon loading from the pickle, this is easy as it can only be one of two
         self.__dict__ = dict
         if self.is_player:
             self.__dict__['death_function'] = getattr(Fighter, 'player_death')

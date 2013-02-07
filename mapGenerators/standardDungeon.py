@@ -95,7 +95,11 @@ class StandardDungeon(AbstractMapGenerator):
                 rooms.append(new_room)
                 num_rooms += 1
 
-        return (self.map, self.objects, player_start_x, player_start_y)
+        #Create the stairs in the last room to be created
+        stairs_down = Object(new_x, new_y, '>', 'stairs down', libtcod.white)
+        self.objects.append(stairs_down)
+
+        return (self.map, self.objects, player_start_x, player_start_y, stairs_down)
 
     def place_objects(self, room):
         #Place Monsters in each room, randomly of course
