@@ -11,6 +11,7 @@
                 <color-g>191</color-g>
                 <color-b>191</color-b>
                 <encounter-chance>40</encounter-chance>
+                <xp>50</xp>
             </monster>
             <monster name="Giant Rat">
                 <type>fighter</type>
@@ -23,6 +24,7 @@
                 <color-g>191</color-g>
                 <color-b>191</color-b>
                 <encounter-chance>15</encounter-chance>
+                <xp>100</xp>
             </monster>
             <monster name="Snake">
                 <type>fighter</type>
@@ -35,6 +37,7 @@
                 <color-g>255</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>30</encounter-chance>
+                <xp>50</xp>
             </monster>
             <monster name="Giant Snake">
                 <type>fighter</type>
@@ -47,6 +50,7 @@
                 <color-g>255</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>15</encounter-chance>
+                <xp>150</xp>
             </monster>
             <monster name="Bat">
                 <type>fighter</type>
@@ -59,6 +63,7 @@
                 <color-g>191</color-g>
                 <color-b>191</color-b>
                 <encounter-chance>40</encounter-chance>
+                <xp>20</xp>
             </monster>
             <monster name="Giant Bat">
                 <type>fighter</type>
@@ -71,6 +76,7 @@
                 <color-g>191</color-g>
                 <color-b>191</color-b>
                 <encounter-chance>25</encounter-chance>
+                <xp>50</xp>
             </monster>
             <monster name="Goblin">
                 <type>fighter</type>
@@ -83,5 +89,6 @@
                 <color-g>128</color-g>
                 <color-b>0</color-b>
                 <encounter-chance>5</encounter-chance>
+                <xp>200</xp>
             </monster>
         </level-zero-monsters>

@@ -66,6 +66,7 @@ class AbstractMapGenerator():
             m.append(monster.find('color-g').text)
             m.append(monster.find('color-b').text)
             m.append(monster.find('encounter-chance').text)
+            m.append(monster.find('xp').text)
 
             #Add the newly created monster list to the list of monsters
             monsters.append(m)

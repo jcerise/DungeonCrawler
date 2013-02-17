@@ -62,6 +62,11 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 MAX_ROOM_MONSTERS = 3
 MAX_ROOM_ITEMS = 2
 
+#Experience and Level up amounts
+LEVEL_UP_BASE = 200
+LEVEL_UP_FACTOR = 150
+LEVEL_SCREEN_WIDTH = 40
+
 def is_blocked(x, y):
     #Test the map tile at the coordinates to see if it is blocked or not
     if map[x][y].blocked:
@@ -378,6 +383,11 @@ def render_all():
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_red)
 
+    level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
+
+    render_bar(1, 2, BAR_WIDTH, 'XP', player.fighter.xp, level_up_xp,
+        libtcod.light_yellow, libtcod.darker_yellow)
+
     libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(dungeon_level))
 
     #Display the names of objects under the mouse
@@ -422,11 +432,15 @@ def new_game():
     #Create our objects, in this case just a player, then add them to the objects array
     #Create a fighter component for the player. The player does not need an AI
     player_death = getattr(Fighter, 'player_death')
-    fighter_component = Fighter(hp = 30, defense = 2, power = 5, is_player = True, death_function = player_death)
+    fighter_component = Fighter(hp = 30, defense = 2, power = 5, xp = 0, is_player = True,
+        death_function = player_death)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
         fighter = fighter_component)
     player.x = player_start_x
     player.y = player_start_y
+
+    #Set the players level
+    player.level = 1
 
     #Add the player to the objects array, which will be drawn to the screen
     objects.insert(0, player)
@@ -472,6 +486,30 @@ def next_level():
 
     #Keep track of how many levels down the player is
     dungeon_level += 1
+
+def check_level_up():
+    #Check each turn to see if the player has leveled up (xp = level up amount)
+    level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
+    if player.fighter.xp >= level_up_xp:
+        #DING DING DING
+        player.level += 1
+        player.fighter.xp -= level_up_xp
+        message('Your prowess at survival has increased! You reached level ' + str(player.level) + '!', libtcod.yellow)
+
+        choice = None
+        while choice == None:
+            choice =  menu('Level up! Choose a stat to raise:\n',
+                ['Constitution (+20 HP, from ' + str(player.fighter.max_hp) + ')',
+                'Strength (+1 Attack, from ' + str(player.fighter.power) + ')',
+                'Agility (+1 Defense, from ' + str(player.fighter.defense) + ')'],
+                LEVEL_SCREEN_WIDTH)
+
+        if choice == 0:
+            player.fighter.max_hp += 20
+        elif choice == 1:
+            player.fighter.power += 1
+        elif choice == 2:
+            player.fighter.defense += 1
 
 def save_game():
     global objects, map, inventory, game_msgs, game_state, stairs_down, dungeon_level
@@ -535,6 +573,8 @@ def play_game():
         render_all()
 
         libtcod.console_flush()
+
+        check_level_up()
 
         #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
         for object in objects:

@@ -200,7 +200,7 @@ class Cavern(AbstractMapGenerator):
                             #Create a component for the monster based on the monster type
                             if monster[1] == 'fighter':
                                 fighter_component = Fighter(hp = int(monster[3]), defense = int(monster[4]), power = int(monster[5]),
-                                    death_function = monster_death)
+                                    xp = int(monster[11]), death_function = monster_death)
 
                             #Create an AI component for the monster based on its AI type
                             if monster[2] == 'basic':

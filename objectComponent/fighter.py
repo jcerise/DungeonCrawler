@@ -6,11 +6,12 @@ class Fighter:
     #or an NPC.
     #Each action method (take_damage, attack, etc, returns a list of messages that will be printed to the console,
     #so the player knows whats going on. Each message has a color associated with it
-    def __init__(self, hp, defense, power, is_player = False, death_function = None):
+    def __init__(self, hp, defense, power, xp, is_player = False, death_function = None):
         self.hp = hp
         self.max_hp = hp
         self.defense = defense
         self.power = power
+        self.xp = xp
         self.death_function = death_function
         self.is_player = is_player
 
@@ -28,7 +29,7 @@ class Fighter:
         else:
             self.__dict__['death_function'] = getattr(Fighter, 'monster_death')
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, source):
         #apply damage if possible
         if damage > 0:
             self.hp -= damage
@@ -37,6 +38,11 @@ class Fighter:
         if self.hp <= 0:
             function = self.death_function
             if function is not None:
+
+                #Give the player some XP for killing this nasty beastie (if it is a nasty beastie, and not the player)
+                if not self.is_player:
+                    source.xp += self.xp
+
                 #Return the messages printed upon execution of this event
                 return function(self, self.owner)
 
@@ -52,7 +58,7 @@ class Fighter:
                         libtcod.white]]
 
             #If the fighter has not died, this will return None, otherwise it returns the death message
-            death_string = target.fighter.take_damage(damage)
+            death_string = target.fighter.take_damage(damage, self)
             if death_string is not None:
                 message.append(death_string)
                 #Return the messages array to print to the console
@@ -104,8 +110,9 @@ class Fighter:
         monster.char = '%'
         monster.color = libtcod.dark_red
         monster.blocks = False
-        monster.fighter = None
         monster.ai = None
-        message = ['success', 'The ' + monster.name.capitalize() + ' has been slain!', libtcod.orange]
+        message = ['success', 'The ' + monster.name.capitalize() + ' has been slain! You have gained ' +
+            str(monster.fighter.xp) + ' experience points.', libtcod.orange]
         monster.name = 'Remains of ' + monster.name
+        monster.fighter = None
         return message
