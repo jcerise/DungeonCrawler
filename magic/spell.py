@@ -36,7 +36,9 @@ class Spell:
         message = [['success', 'A loud clap of thunder booms out, as a bolt of white hot lightning issues forth!' +
                                'It strikes the ' + enemy.name + ' with a crack, dealing ' + str(damage) + ' damage!',
                     libtcod.light_blue]]
-        message += [enemy.fighter.take_damage(damage, caster.fighter)]
+        damage_message = enemy.fighter.take_damage(damage, caster.fighter)
+        if damage_message is not None:
+            message.append(damage_message)
         return message
 
     def cast_confuse(self, damage, range, caster, objects, fov_map, x, y):
