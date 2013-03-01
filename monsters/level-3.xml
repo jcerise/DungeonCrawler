@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+        <level-three-monsters>
+            <monster name="Orc">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>50</hit-points>
+                <defense>5</defense>
+                <attack-power>8</attack-power>
+                <character>o</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+                <xp>50</xp>
+            </monster>
+            <monster name="Troll">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>75</hit-points>
+                <defense>8</defense>
+                <attack-power>7</attack-power>
+                <character>T</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>15</encounter-chance>
+                <xp>100</xp>
+            </monster>
+            <monster name="Centaur">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>45</hit-points>
+                <defense>2</defense>
+                <attack-power>8</attack-power>
+                <character>c</character>
+                <color-r>0</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>30</encounter-chance>
+                <xp>50</xp>
+            </monster>
+            <monster name="Angry Dwarf">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>50</hit-points>
+                <defense>7</defense>
+                <attack-power>7</attack-power>
+                <character>d</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+                <xp>20</xp>
+            </monster>
+            <monster name="Giant Bat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>8</hit-points>
+                <defense>0</defense>
+                <attack-power>2</attack-power>
+                <character>B</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>25</encounter-chance>
+                <xp>50</xp>
+            </monster>
+            <monster name="Dragon">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>100</hit-points>
+                <defense>10</defense>
+                <attack-power>12</attack-power>
+                <character>D</character>
+                <color-r>0</color-r>
+                <color-g>128</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>5</encounter-chance>
+                <xp>200</xp>
+            </monster>
+        </level-three-monsters>

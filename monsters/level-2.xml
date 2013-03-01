@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+        <level-two-monsters>
+            <monster name="Giant Ant">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>15</hit-points>
+                <defense>1</defense>
+                <attack-power>3</attack-power>
+                <character>a</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+                <xp>50</xp>
+            </monster>
+            <monster name="Kobold">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>25</hit-points>
+                <defense>2</defense>
+                <attack-power>4</attack-power>
+                <character>k</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>25</encounter-chance>
+                <xp>100</xp>
+            </monster>
+            <monster name="Zombie">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>25</hit-points>
+                <defense>1</defense>
+                <attack-power>5</attack-power>
+                <character>z</character>
+                <color-r>0</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>30</encounter-chance>
+                <xp>50</xp>
+            </monster>
+            <monster name="Gelatinous Cube">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>45</hit-points>
+                <defense>0</defense>
+                <attack-power>6</attack-power>
+                <character>C</character>
+                <color-r>0</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>10</encounter-chance>
+                <xp>150</xp>
+            </monster>
+            <monster name="Vampire Bat">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>15</hit-points>
+                <defense>1</defense>
+                <attack-power>3</attack-power>
+                <character>b</character>
+                <color-r>191</color-r>
+                <color-g>191</color-g>
+                <color-b>191</color-b>
+                <encounter-chance>40</encounter-chance>
+                <xp>20</xp>
+            </monster>
+            <monster name="HobGoblin">
+                <type>fighter</type>
+                <ai-type>basic</ai-type>
+                <hit-points>45</hit-points>
+                <defense>3</defense>
+                <attack-power>6</attack-power>
+                <character>h</character>
+                <color-r>0</color-r>
+                <color-g>128</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>10</encounter-chance>
+                <xp>200</xp>
+            </monster>
+        </level-two-monsters>

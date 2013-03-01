@@ -66,6 +66,7 @@ MAX_ROOM_ITEMS = 2
 LEVEL_UP_BASE = 200
 LEVEL_UP_FACTOR = 150
 LEVEL_SCREEN_WIDTH = 40
+CHARACTER_SCREEN_WIDTH = 30
 
 def is_blocked(x, y):
     #Test the map tile at the coordinates to see if it is blocked or not
@@ -187,6 +188,13 @@ def handle_keys():
                 #Go down the stairs, but first check to ensure the player is standing directly on top of them
                 if stairs_down.x == player.x and stairs_down.y == player.y:
                     next_level()
+
+            if key_char =='c':
+                #Show the character sheet
+                level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
+                msgbox('Character Information\n\nLevel: ' + str(player.level) + '\nExperience: ' + str(player.fighter.xp) +
+                '\nExperience to Level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
+                '\nAttack: ' + str(player.fighter.power) + '\nDefense: ' + str(player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
             return 'didnt-take-turn'
 
@@ -417,10 +425,10 @@ def new_game():
     map_chance = randrange(0, 2)
     if map_chance == 0:
         mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, dungeon_level)
     else:
         mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, dungeon_level)
 
     #Use the map object to generate the map array, placing all monsters and items in the process
     #This will return the map array, the objects array, and the start coordinates for the player
@@ -462,15 +470,18 @@ def next_level():
 
     message('You head down a winding passage, travelling deeper into the depths of the dungeon...')
 
+    #Keep track of how many levels down the player is
+    dungeon_level += 1
+
     #Create the map object, based on what type of map we need for this floor
     #Choose a map type at random. This is temporary, until I get floors and progression built in
     map_chance = randrange(0, 2)
     if map_chance == 0:
         mapObject = Cavern(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, dungeon_level)
     else:
         mapObject = StandardDungeon(MAP_WIDTH, MAP_HEIGHT, MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE,
-            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS)
+            MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, dungeon_level)
 
     #Use the map object to generate the map array, placing all monsters and items in the process
     #This will return the map array, the objects array, and the start coordinates for the player
@@ -483,9 +494,6 @@ def next_level():
 
     #Initialize the field of view
     initialize_fov()
-
-    #Keep track of how many levels down the player is
-    dungeon_level += 1
 
 def check_level_up():
     #Check each turn to see if the player has leveled up (xp = level up amount)

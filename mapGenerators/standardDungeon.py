@@ -13,7 +13,7 @@ from fighterAi.basic import *
 
 class StandardDungeon(AbstractMapGenerator):
 
-    def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, max_items):
+    def __init__(self, width, height, max_rooms, min_room_size, max_room_size, max_monsters, max_items, level):
         self.width = width
         self.height = height
         self.max_rooms = max_rooms
@@ -26,8 +26,8 @@ class StandardDungeon(AbstractMapGenerator):
 
         #Create lists of items and monsters based on the current dungeon level
         #These are added into the objects array
-        (self.monsters, self.monster_appearance_chances) = self.setup_monsters()
-        (self.items, self.item_appearance_chances) = self.setup_items()
+        (self.monsters, self.monster_appearance_chances) = self.setup_monsters(level)
+        (self.items, self.item_appearance_chances) = self.setup_items(level)
 
         #Fill map with blocked tiles, this will allow us to 'carve' rooms for the player
         #to explore
