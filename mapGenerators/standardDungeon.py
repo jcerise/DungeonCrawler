@@ -2,14 +2,7 @@ from tile import *
 import libtcodpy as libtcod
 from rect import Rect
 from abstractMapGenerator import *
-from gameObject import *
 
-#Objerct components
-from objectComponent.fighter import *
-from objectComponent.item import *
-
-#Object AIs
-from fighterAi.basic import *
 
 class StandardDungeon(AbstractMapGenerator):
 
@@ -99,38 +92,19 @@ class StandardDungeon(AbstractMapGenerator):
         stairs_down = Object(new_x, new_y, '>', 'stairs down', libtcod.white)
         self.objects.append(stairs_down)
 
-        return (self.map, self.objects, player_start_x, player_start_y, stairs_down)
+        return self.map, self.objects, player_start_x, player_start_y, stairs_down
 
     def place_objects(self, room):
         #Place Monsters in each room, randomly of course
         num_monsters = libtcod.random_get_int(0, 0, self.max_monsters)
 
         for i in range(num_monsters):
-            x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
-            y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
+            x = libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
+            y = libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
 
             if not self.is_blocked(self.map, self.objects, x, y):
-                #Choose a monster to spawn from the list of applicable monsters
-                spawn = self.random_choice_index(self.monster_appearance_chances)
 
-                #Choose the monster based on the spawn chance
-                monster = self.monsters[spawn]
-
-                #Create a death function for the monster
-                monster_death = getattr(Fighter, 'monster_death')
-
-                #Create a component for the monster based on the monster type
-                if monster[1] == 'fighter':
-                    fighter_component = Fighter(hp = int(monster[3]), defense = int(monster[4]), power = int(monster[5]),
-                        xp = int(monster[11]), death_function = monster_death)
-
-                #Create an AI component for the monster based on its AI type
-                if monster[2] == 'basic':
-                    ai_component = BasicMonster()
-
-                #Finally, create the monster
-                monster = Object(x, y, char = monster[6], name = monster[0], color = libtcod.Color(int(monster[7]),
-                    int(monster[8]), int(monster[9])), blocks = True, fighter = fighter_component,  ai = ai_component)
+                monster = self.generate_monster(x, y, self.monster_appearance_chances, self.monsters)
 
                 #Add the monster to the objects array
                 self.objects.append(monster)
@@ -144,20 +118,9 @@ class StandardDungeon(AbstractMapGenerator):
             y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
 
             if not self.is_blocked(self.map, self.objects, x, y):
-                #Choose an item to create from the list of applicable items
-                item_choice = self.random_choice_index(self.item_appearance_chances)
 
-                #Choose the item based on the spawn chance
-                item = self.items[item_choice]
+                item = self.generate_item(x, y, self.item_appearance_chances, self.items)
 
-                #Find the use function for this object, and apply it to the item
-                item_use_function = item[2]
-
-                #Create an object and item component from the loaded values
-                item_component = Item(value = int(item[3]), range = int(item[4]), use_function = item_use_function,
-                    targeting = item[10])
-                item = Object(x, y, item[5], item[0], color = libtcod.Color(int(item[6]), int(item[7]), int(item[8])),
-                    item = item_component)
                 self.objects.append(item)
 
     def create_room(self, room):

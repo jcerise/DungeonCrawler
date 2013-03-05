@@ -170,15 +170,16 @@ def handle_keys():
                         break
             if key_char == 'i':
                 #Show the inventory
-                chosen_item = inventory_menu("Press the key of the item of you would like to use, or any other to cancel")
+                chosen_item = inventory_menu("Press the key of the item of you would like to use, or any other to "
+                                             "cancel")
                 if chosen_item is not None:
                     #Get and print out any messages returned by item use
-
-                    if chosen_item.targeting == 'manual':
-                        message('Left-click a tile to target, or right-click to cancel.', libtcod.light_cyan)
-                        (x, y) = target_tile()
-                    else:
-                        (x, y) = (None, None)
+                    #Set the coordinates to none. They will be set if we actually need to use them (targeting)
+                    (x, y) = (None, None)
+                    if chosen_item.type != 'equipment':
+                        if chosen_item.targeting == 'manual':
+                            message('Left-click a tile to target, or right-click to cancel.', libtcod.light_cyan)
+                            (x, y) = target_tile()
 
                     action_result = chosen_item.use(inventory, player, objects, fov_map, x, y)
                     for success, line, color in action_result:
@@ -189,7 +190,7 @@ def handle_keys():
                 if stairs_down.x == player.x and stairs_down.y == player.y:
                     next_level()
 
-            if key_char =='c':
+            if key_char == 'c':
                 #Show the character sheet
                 level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(player.level) + '\nExperience: ' + str(player.fighter.xp) +
@@ -584,7 +585,8 @@ def play_game():
 
         check_level_up()
 
-        #Stop character trails by placing a space where the object is. If they don't move, their icon will overwrite this
+        # Stop character trails by placing a space where the object is. If they don't move, their icon will
+        # overwrite this
         for object in objects:
             object.clear(con)
 

@@ -1,5 +1,10 @@
 import libtcodpy as libtcod
+from objectComponent.fighter import *
+from objectComponent.equipment import *
+from fighterAi.basic import *
+from gameObject import *
 import xml.etree.ElementTree as ET
+
 
 class AbstractMapGenerator():
 
@@ -95,14 +100,15 @@ class AbstractMapGenerator():
                 monsters.append(m)
             index_counter += 1;
 
-        #Next, build a list with just the monster appearance chances, so we can figure out later how often each monster will
-        #show up. The index of the chance in this list directly corresponds to the index of the monster in the monsters list
+        # Next, build a list with just the monster appearance chances, so we can figure out later how often each monster
+        # will show up. The index of the chance in this list directly corresponds to the index of the monster in the
+        # monsters list
         monster_appearance_chances = []
 
         for appearing_monster in monsters:
             monster_appearance_chances.append(int(appearing_monster[10]))
 
-        return (monsters, monster_appearance_chances)
+        return monsters, monster_appearance_chances
 
     def setup_items(self, level):
         #Figure out which items to include on this level, and load them all
@@ -121,16 +127,25 @@ class AbstractMapGenerator():
             i = []
             i.append(item.get('name'))
             i.append(item.find('type').text)
-            i.append(item.find('use').text)
-            i.append(item.find('value').text)
-            i.append(item.find('range').text)
+
+            if item.find('type').text == 'equipment':
+                #We have a slightly different set of attributes for equipment
+                i.append(item.find('use').text)
+                i.append(item.find('attack').text)
+                i.append(item.find('range').text)
+                i.append(item.find('slot').text)
+            else:
+                #This is a standard item, find the appropriate attributes
+                i.append(item.find('use').text)
+                i.append(item.find('value').text)
+                i.append(item.find('range').text)
+                i.append(item.find('targeting').text)
+
             i.append(item.find('character').text)
             i.append(item.find('color-r').text)
             i.append(item.find('color-g').text)
             i.append(item.find('color-b').text)
             i.append(item.find('encounter-chance').text)
-            i.append(item.find('targeting').text)
-
 
             #Add the newly created monster list to the list of monsters
             items.append(i)
@@ -140,7 +155,58 @@ class AbstractMapGenerator():
         item_appearance_chances = []
 
         for appearing_item in items:
-            item_appearance_chances.append(int(appearing_item[9]))
+            item_appearance_chances.append(int(appearing_item[10]))
 
-        return (items, item_appearance_chances)
+        return items, item_appearance_chances
+
+    def generate_monster(self, x, y, appearance_chances, monsters):
+        #Choose a monster to spawn from the list of applicable monsters
+        spawn = self.random_choice_index(appearance_chances)
+
+        #Choose the monster based on the spawn chance
+        monster = monsters[spawn]
+
+        #Create a death function for the monster
+        monster_death = getattr(Fighter, 'monster_death')
+
+        #Create a component for the monster based on the monster type
+        if monster[1] == 'fighter':
+            fighter_component = Fighter(hp=int(monster[3]), defense=int(monster[4]), power=int(monster[5]),
+                                        xp=int(monster[11]), death_function=monster_death)
+
+        #Create an AI component for the monster based on its AI type
+        if monster[2] == 'basic':
+            ai_component = BasicMonster()
+
+        #Finally, create the monster
+        monster = Object(x, y, char=monster[6], name=monster[0], color=libtcod.Color(int(monster[7]),
+                         int(monster[8]), int(monster[9])), blocks=True, fighter=fighter_component,  ai=ai_component)
+
+        return monster
+
+    def generate_item(self, x, y, appearance_chances, items):
+        #Choose an item to create from the list of applicable items
+        item_choice = self.random_choice_index(appearance_chances)
+
+        #Choose the item based on the spawn chance
+        item = items[item_choice]
+
+        #Find the use function for this object, and apply it to the item
+        item_use_function = item[2]
+
+        if item[1] == 'equipment':
+            #This is a piece of equipment, so create equipment instead of a standard item
+            equipment = Equipment(item[5])
+
+            item = Object(x, y, item[6], item[0], color=libtcod.Color(int(item[7]), int(item[8]), int(item[9])),
+                          equipment=equipment)
+        else:
+            #Create an object and item component from the loaded values
+            item_component = Item(value=int(item[3]), range=int(item[4]), use_function=item_use_function,
+                                  targeting=item[5])
+
+            item = Object(x, y, item[6], item[0], color=libtcod.Color(int(item[7]), int(item[8]), int(item[9])),
+                          item=item_component)
+
+        return item
 
