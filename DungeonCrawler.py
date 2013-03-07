@@ -452,13 +452,16 @@ def new_game():
     #Initialize the field of view
     initialize_fov()
 
+    #Initialize the players inventory, empty of course. This will be attached to the player object
+    inventory = []
+
     #Create our objects, in this case just a player, then add them to the objects array
     #Create a fighter component for the player. The player does not need an AI
     player_death = getattr(Fighter, 'player_death')
     fighter_component = Fighter(hp = 30, defense = 2, power = 5, xp = 0, is_player = True,
         death_function = player_death)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
-        fighter = fighter_component)
+        fighter = fighter_component, inventory=inventory)
     player.x = player_start_x
     player.y = player_start_y
 
@@ -467,9 +470,6 @@ def new_game():
 
     #Add the player to the objects array, which will be drawn to the screen
     objects.insert(0, player)
-
-    #Initialize the players inventory, empty of course
-    inventory = []
 
     game_state = 'playing'
 
@@ -528,11 +528,11 @@ def check_level_up():
                 LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
-            player.fighter.max_hp += 20
+            player.fighter.base_max_hp += 20
         elif choice == 1:
-            player.fighter.power += 1
+            player.fighter.base_power += 1
         elif choice == 2:
-            player.fighter.defense += 1
+            player.fighter.base_defense += 1
 
 def save_game():
     global objects, map, inventory, game_msgs, game_state, stairs_down, dungeon_level

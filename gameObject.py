@@ -7,7 +7,7 @@ class Object:
     #Represents a generic object within the game; A chair, a player, an orc, stairs
     #This object is always represented by a character on the screen
     def __init__(self, x, y, char, name, color, blocks=False, fighter=None, ai=None, item=None,
-                 equipment=None):
+                 equipment=None, inventory=None):
         self.x = x
         self.y = y
         self.char = char
@@ -15,6 +15,10 @@ class Object:
         self.name = name
         self.blocks = blocks
         self.alive = True
+
+        #Set the inventory for this object. For the time being, only the player has an inventory, but might add one
+        #for monsters in the future
+        self.inventory = inventory
 
         self.fighter = fighter
         if self.fighter:

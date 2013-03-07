@@ -8,12 +8,27 @@ class Fighter:
     #so the player knows whats going on. Each message has a color associated with it
     def __init__(self, hp, defense, power, xp, is_player = False, death_function = None):
         self.hp = hp
-        self.max_hp = hp
-        self.defense = defense
-        self.power = power
+        self.base_max_hp = hp
+        self.base_defense = defense
+        self.base_power = power
         self.xp = xp
         self.death_function = death_function
         self.is_player = is_player
+
+    @property
+    def power(self):
+        bonus = sum(equipment.power_bonus for equipment in self.get_all_equipped(self.is_player))
+        return self.base_power + bonus
+
+    @property
+    def defense(self):
+        bonus = sum(equipment.defense_bonus for equipment in self.get_all_equipped(self.is_player))
+        return self.base_defense + bonus
+
+    @property
+    def max_hp(self):
+        bonus = sum(equipment.max_hp_bonus for equipment in self.get_all_equipped(self.is_player))
+        return self.base_max_hp + bonus
 
     def __getstate__(self):
         #We need to remove the death function call, as it creates an instance method exception when pickling
@@ -28,6 +43,22 @@ class Fighter:
             self.__dict__['death_function'] = getattr(Fighter, 'player_death')
         else:
             self.__dict__['death_function'] = getattr(Fighter, 'monster_death')
+
+    def get_all_equipped(self, is_player):
+        #Get every item that the object has equipped and return them as a list
+        #Currently, this only applies to the player, but in the future monsters may have inventories
+        if is_player:
+            equipped_list = []
+            #Check through every item in the inventory
+            for item in self.owner.inventory:
+                #If its equipment and equipped, add it to the returned list
+                if item.equipment and item.equipment.is_equipped:
+                    equipped_list.append(item.equipment)
+            return equipped_list
+        else:
+            #Monsters have no equipment, so just return an empty list, for now
+            return []
+
 
     def take_damage(self, damage, source):
         #apply damage if possible
