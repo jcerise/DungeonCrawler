@@ -106,6 +106,6 @@
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>
-                <encounter-chance>800000</encounter-chance>
+                <encounter-chance>80</encounter-chance>
             </item>
         </level-zero-items>

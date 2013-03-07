@@ -124,28 +124,28 @@ class AbstractMapGenerator():
 
         #Create a list with all the applicable monsters for this floor
         for item in item_root.findall('item'):
-            i = []
-            i.append(item.get('name'))
-            i.append(item.find('type').text)
+            i = {}
+            i['name'] = item.get('name')
+            i['type'] = item.find('type').text
 
             if item.find('type').text == 'equipment':
                 #We have a slightly different set of attributes for equipment
-                i.append(item.find('use').text)
-                i.append(item.find('attack').text)
-                i.append(item.find('range').text)
-                i.append(item.find('slot').text)
+                i['use'] = item.find('use').text
+                i['attack'] = item.find('attack').text
+                i['range'] = item.find('range').text
+                i['slot'] = item.find('slot').text
             else:
                 #This is a standard item, find the appropriate attributes
-                i.append(item.find('use').text)
-                i.append(item.find('value').text)
-                i.append(item.find('range').text)
-                i.append(item.find('targeting').text)
+                i['use'] = item.find('use').text
+                i['value'] = item.find('value').text
+                i['range'] = item.find('range').text
+                i['targeting'] = item.find('targeting').text
 
-            i.append(item.find('character').text)
-            i.append(item.find('color-r').text)
-            i.append(item.find('color-g').text)
-            i.append(item.find('color-b').text)
-            i.append(item.find('encounter-chance').text)
+            i['character'] = item.find('character').text
+            i['color-r'] = item.find('color-r').text
+            i['color-g'] = item.find('color-g').text
+            i['color-b'] = item.find('color-b').text
+            i['encounter-chance'] = item.find('encounter-chance').text
 
             #Add the newly created monster list to the list of monsters
             items.append(i)
@@ -155,7 +155,7 @@ class AbstractMapGenerator():
         item_appearance_chances = []
 
         for appearing_item in items:
-            item_appearance_chances.append(int(appearing_item[10]))
+            item_appearance_chances.append(int(appearing_item['encounter-chance']))
 
         return items, item_appearance_chances
 
@@ -192,21 +192,21 @@ class AbstractMapGenerator():
         item = items[item_choice]
 
         #Find the use function for this object, and apply it to the item
-        item_use_function = item[2]
+        item_use_function = item['use']
 
-        if item[1] == 'equipment':
+        if item['type'] == 'equipment':
             #This is a piece of equipment, so create equipment instead of a standard item
-            equipment = Equipment(item[5])
+            equipment = Equipment(item['slot'])
 
-            item = Object(x, y, item[6], item[0], color=libtcod.Color(int(item[7]), int(item[8]), int(item[9])),
-                          equipment=equipment)
+            item = Object(x, y, item['character'], item['name'], color=libtcod.Color(int(item['color-r']),
+                          int(item['color-g']), int(item['color-b'])),equipment=equipment)
         else:
             #Create an object and item component from the loaded values
-            item_component = Item(value=int(item[3]), range=int(item[4]), use_function=item_use_function,
-                                  targeting=item[5])
+            item_component = Item(value=int(item['value']), range=int(item['range']), use_function=item_use_function,
+                                  targeting=item['targeting'])
 
-            item = Object(x, y, item[6], item[0], color=libtcod.Color(int(item[7]), int(item[8]), int(item[9])),
-                          item=item_component)
+            item = Object(x, y, item['character'], item['name'], color=libtcod.Color(int(item['color-r']),
+                          int(item['color-g']), int(item['color-b'])), item=item_component)
 
         return item
 
