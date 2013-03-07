@@ -68,6 +68,7 @@ LEVEL_UP_FACTOR = 150
 LEVEL_SCREEN_WIDTH = 40
 CHARACTER_SCREEN_WIDTH = 30
 
+
 def is_blocked(x, y):
     #Test the map tile at the coordinates to see if it is blocked or not
     if map[x][y].blocked:
@@ -80,6 +81,7 @@ def is_blocked(x, y):
 
     #There is no object or tile blocking this position
     return False
+
 
 def target_tile(max_range = None):
     #Return the coordinates of a tile left clicked in the players FOV (or optionally within a range)
@@ -94,12 +96,11 @@ def target_tile(max_range = None):
 
         if mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y) and \
            (max_range is None or player.distance(x, y <= max_range)):
-            return (x, y)
+            return x, y
 
         if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
             #Right click and escape cancel tile selection
-            return (None, None)
-
+            return None, None
 
 
 def player_move_or_attack(dx, dy):
@@ -125,6 +126,7 @@ def player_move_or_attack(dx, dy):
         blocked = is_blocked(x, y)
         player.move(map, dx, dy, blocked)
         fov_recompute = True
+
 
 def handle_keys():
     global player_x, player_y
@@ -163,10 +165,7 @@ def handle_keys():
                     #Check for an item in the players currently occupied tile
                     if object.x == player.x and  object.y == player.y and object.item:
                         #Check if its an item, and then pick it up
-                        action_result = object.item.pick_up(inventory, objects)
-                        #Print out any messages associated with this action
-                        for success, line, color in action_result:
-                            message(line, color)
+                        print_messages(object.item.pick_up(inventory, objects))
                         break
             if key_char == 'i':
                 #Show the inventory
@@ -181,14 +180,18 @@ def handle_keys():
                             message('Left-click a tile to target, or right-click to cancel.', libtcod.light_cyan)
                             (x, y) = target_tile()
 
-                    action_result = chosen_item.use(inventory, player, objects, fov_map, x, y)
-                    for success, line, color in action_result:
-                        message(line, color)
+                    print_messages(chosen_item.use(inventory, player, objects, fov_map, x, y))
 
             if key_char == '>':
                 #Go down the stairs, but first check to ensure the player is standing directly on top of them
                 if stairs_down.x == player.x and stairs_down.y == player.y:
                     next_level()
+
+            if key_char == 'd':
+                #show the inventory, and if an item is selected, drop it
+                chosen_item = inventory_menu('Press the key of the item you wish to drop, or any other to cancel.\n')
+                if chosen_item is not None:
+                    print_messages(chosen_item.drop(objects, inventory, player))
 
             if key_char == 'c':
                 #Show the character sheet
@@ -225,6 +228,11 @@ def message(new_msg, color = libtcod.white):
 
         #Add the new line as a tuple, setting the text and the text color
         game_msgs.append((line, color))
+
+def print_messages(messages):
+    #Print out a series of messages returned from components
+    for success, line, color in messages:
+        message(line, color)
 
 def menu(header, options, width):
     #First, make sure the menu has 26 or fewer items (This is due to an alphabetical selection limitation)
@@ -315,7 +323,13 @@ def inventory_menu(header):
     if len(inventory) == 0:
         options = ['Inventory is empty!']
     else:
-        options = [item.name for item in inventory]
+        options = []
+        for item in inventory:
+            text = item.name
+            #Show additional information in case this item is currently equipped
+            if item.equipment and item.equipment.is_equipped:
+                text = text + ' (on ' + item.equipment.slot + ')'
+            options.append(text)
 
     index = menu(header, options, INVENTORY_WIDTH)
 

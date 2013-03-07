@@ -1,6 +1,4 @@
 import libtcodpy as libtcod
-from fighterAi.confused import *
-from fighterAi.enraged import *
 from magic.spell import *
 
 
@@ -34,7 +32,17 @@ class Item:
         #We need to handle an item that is a piece of equipment. Rather than using equipment, it gets equipped, so
         #check here and do that if necessary
         if self.owner.equipment:
-            messages = self.owner.equipment.toggle_equip()
+            #Set up the messages array
+            messages = []
+
+            #Check for equipment equipped in the same slot. If present, un-equip it
+            if not self.owner.equipment.is_equipped:
+                old_equipment = self.get_equipped_in_slot(inventory, self.owner.equipment.slot)
+                if old_equipment is not None:
+                    messages.append(old_equipment.de_equip())
+
+            #Equip the new
+            messages.append(self.owner.equipment.toggle_equip())
             return messages
 
         #Call the use_function defined on object creation
@@ -52,6 +60,28 @@ class Item:
                 inventory.remove(self.owner)
 
         return messages
+
+    def drop(self, objects, inventory, player):
+        #'Drop' the item by adding it back to the map, and removing it from the players inventory
+        messages = []
+        #if the item is equipment, un-equip it first
+        if self.owner.equipment:
+            messages.append(self.owner.equipment.de_equip())
+
+        objects.append(self.owner)
+        inventory.remove(self.owner)
+        self.owner.x = player.x
+        self.owner.y = player.y
+        messages.append(['success', 'You dropped ' + self.owner.name + '.', libtcod.yellow])
+
+        return messages
+
+
+    def get_equipped_in_slot(self, inventory, slot):
+        for obj in inventory:
+            if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
+                return obj.equipment
+        return None
 
     def determine_targeting(self):
         return self.targeting

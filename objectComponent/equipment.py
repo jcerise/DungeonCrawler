@@ -17,7 +17,7 @@ class Equipment:
     def equip(self):
         #Equip the piece of equipment in question
         self.is_equipped = True
-        message = [['success', 'Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green]]
+        message = ['success', 'Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green]
         return message
 
     def de_equip(self):
@@ -26,6 +26,6 @@ class Equipment:
             return
 
         self.is_equipped = False
-        message = [['success', 'Un-equipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow]]
+        message = ['success', 'Un-equipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow]
         return message
 
