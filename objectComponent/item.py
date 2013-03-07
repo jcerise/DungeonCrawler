@@ -65,7 +65,7 @@ class Item:
         #'Drop' the item by adding it back to the map, and removing it from the players inventory
         messages = []
         #if the item is equipment, un-equip it first
-        if self.owner.equipment:
+        if self.owner.equipment and self.owner.equipment.is_equipped:
             messages.append(self.owner.equipment.de_equip())
 
         objects.append(self.owner)
