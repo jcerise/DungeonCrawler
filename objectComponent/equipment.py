@@ -3,12 +3,12 @@ import libtcodpy as libtcod
 
 class Equipment:
     #Defines an object that can be equipped, and is not a one-shot item
-    def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0):
+    def __init__(self, slot, type, use, value=0):
         self.slot = slot
         self.is_equipped = False
-        self.power_bonus = 0
-        self.defense_bonus = 0
-        self.max_hp_bonus = 0
+        self.value = value
+        self.type = type
+        self.use = use
 
     def toggle_equip(self):
         #If the equipment is equipped, remove it, otherwise equip it

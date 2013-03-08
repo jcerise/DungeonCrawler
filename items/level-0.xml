@@ -57,7 +57,7 @@
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>
-                <encounter-chance>80</encounter-chance>
+                <encounter-chance>20</encounter-chance>
                 <targeting>closest</targeting>
             </item>
             <item name="Scroll of Confusion">
@@ -69,7 +69,7 @@
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>
-                <encounter-chance>80</encounter-chance>
+                <encounter-chance>20</encounter-chance>
                 <targeting>closest</targeting>
             </item>
             <item name="Scroll of Enrage Monster">
@@ -81,7 +81,7 @@
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>
-                <encounter-chance>80</encounter-chance>
+                <encounter-chance>20</encounter-chance>
                 <targeting>closest</targeting>
             </item>
             <item name="Scroll of Fireball">
@@ -93,16 +93,52 @@
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>
-                <encounter-chance>80</encounter-chance>
+                <encounter-chance>20</encounter-chance>
                 <targeting>manual</targeting>
+            </item>
+            <item name="Bent dagger">
+                <type>equipment</type>
+                <use>attack</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>right-hand</slot>
+                <character>\</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
             </item>
             <item name="Rusty sword">
                 <type>equipment</type>
-                <use>None</use>
-                <attack>2</attack>
+                <use>attack</use>
+                <damage>2</damage>
                 <range>1</range>
                 <slot>right-hand</slot>
                 <character>/</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Battered shield">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>left-hand</slot>
+                <character>|</character>
+                <color-r>25</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Battered helm">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>head</slot>
+                <character>^</character>
                 <color-r>255</color-r>
                 <color-g>255</color-g>
                 <color-b>0</color-b>

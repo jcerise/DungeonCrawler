@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+from combatResolver import CombatResolver
 import math
 
 class Fighter:
@@ -6,29 +7,43 @@ class Fighter:
     #or an NPC.
     #Each action method (take_damage, attack, etc, returns a list of messages that will be printed to the console,
     #so the player knows whats going on. Each message has a color associated with it
-    def __init__(self, hp, defense, power, xp, is_player = False, death_function = None):
+    def __init__(self, hp, attack, defence, strength, protection, xp, is_player = False, death_function = None):
         self.hp = hp
-        self.base_max_hp = hp
-        self.base_defense = defense
-        self.base_power = power
+        self.max_hp = hp
+        self.base_defence = defence
+        self.base_attack = attack
+        self.base_strength = strength
+        self.base_protection = protection
         self.xp = xp
         self.death_function = death_function
         self.is_player = is_player
 
-    @property
-    def power(self):
-        bonus = sum(equipment.power_bonus for equipment in self.get_all_equipped(self.is_player))
-        return self.base_power + bonus
+        self.combatResolver = CombatResolver(6)
 
     @property
-    def defense(self):
-        bonus = sum(equipment.defense_bonus for equipment in self.get_all_equipped(self.is_player))
-        return self.base_defense + bonus
+    def damage(self):
+        #Calculate how much damage this fighter deals, based on equipped weapons and base strength
+        bonus = sum(equipment.value for equipment in self.get_all_equipped_weapons(self.is_player))
+        return self.base_strength + bonus
 
     @property
-    def max_hp(self):
-        bonus = sum(equipment.max_hp_bonus for equipment in self.get_all_equipped(self.is_player))
-        return self.base_max_hp + bonus
+    def equipmentDamage(self):
+        return sum(equipment.value for equipment in self.get_all_equipped_weapons(self.is_player))
+
+    @property
+    def equipmentProtection(self):
+        return sum(equipment.value for equipment in self.get_all_equipped_armor(self.is_player))
+
+    @property
+    def protection(self):
+        #Calculate how much protection this fighter has, based on equipped armors and base protection
+        bonus = sum(equipment.value for equipment in self.get_all_equipped_armor(self.is_player))
+        return self.base_protection + bonus
+
+    # @property
+    # def max_hp(self):
+    #     bonus = sum(equipment.max_hp_bonus for equipment in self.get_all_equipped(self.is_player))
+    #     return self.base_max_hp + bonus
 
     def __getstate__(self):
         #We need to remove the death function call, as it creates an instance method exception when pickling
@@ -44,7 +59,7 @@ class Fighter:
         else:
             self.__dict__['death_function'] = getattr(Fighter, 'monster_death')
 
-    def get_all_equipped(self, is_player):
+    def get_all_equipped_weapons(self, is_player):
         #Get every item that the object has equipped and return them as a list
         #Currently, this only applies to the player, but in the future monsters may have inventories
         if is_player:
@@ -52,7 +67,22 @@ class Fighter:
             #Check through every item in the inventory
             for item in self.owner.inventory:
                 #If its equipment and equipped, add it to the returned list
-                if item.equipment and item.equipment.is_equipped:
+                if item.equipment and item.equipment.is_equipped and item.equipment.use is 'attack':
+                    equipped_list.append(item.equipment)
+            return equipped_list
+        else:
+            #Monsters have no equipment, so just return an empty list, for now
+            return []
+
+    def get_all_equipped_armor(self, is_player):
+        #Get every item that the object has equipped and return them as a list
+        #Currently, this only applies to the player, but in the future monsters may have inventories
+        if is_player:
+            equipped_list = []
+            #Check through every item in the inventory
+            for item in self.owner.inventory:
+                #If its equipment and equipped, add it to the returned list
+                if item.equipment and item.equipment.is_equipped and item.equipment.use is 'defense':
                     equipped_list.append(item.equipment)
             return equipped_list
         else:
@@ -79,25 +109,18 @@ class Fighter:
 
     def attack(self, target):
         #Simple damage calculation - power minus target defense
-        damage = self.power - target.fighter.defense
+        messages, damageDealt = self.combatResolver.initiateCombat(self, target)
 
-        if damage > 0:
+        if damageDealt > 0:
             #Make the target take some damage
-            #Create a list of messages to return to the console, so the player knows whats going on
-            #This needs to be an list, as the potential death message needs to be on its own line
-            message = [['success', self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' damage!',
-                        libtcod.white]]
 
             #If the fighter has not died, this will return None, otherwise it returns the death message
-            death_string = target.fighter.take_damage(damage, self)
+            death_string = target.fighter.take_damage(damageDealt, self)
             if death_string is not None:
-                message.append(death_string)
-                #Return the messages array to print to the console
-            return message
-        else:
-            #Create a message array to return to the console
-            return [['success', self.owner.name.capitalize() + ' attacks ' + target.name + ', but it has no effect!',
-                     libtcod.white]]
+                messages.append(death_string)
+
+        #Return the messages array to print to the console
+        return messages
 
     def heal(self, amount):
         #Heal by the given amount, without going over max_hp

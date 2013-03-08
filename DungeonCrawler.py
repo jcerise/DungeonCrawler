@@ -66,7 +66,7 @@ MAX_ROOM_ITEMS = 2
 LEVEL_UP_BASE = 200
 LEVEL_UP_FACTOR = 150
 LEVEL_SCREEN_WIDTH = 40
-CHARACTER_SCREEN_WIDTH = 30
+CHARACTER_SCREEN_WIDTH = 45
 
 
 def is_blocked(x, y):
@@ -198,7 +198,10 @@ def handle_keys():
                 level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(player.level) + '\nExperience: ' + str(player.fighter.xp) +
                 '\nExperience to Level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
-                '\nAttack: ' + str(player.fighter.power) + '\nDefense: ' + str(player.fighter.defense), CHARACTER_SCREEN_WIDTH)
+                '\nStrength: ' + str(player.fighter.base_strength) + '\nDefense: ' + str(player.fighter.base_defence) +
+                '\n\nYou are capable of dealing ' + str(player.fighter.damage) + ' damage (' + str(player.fighter.equipmentDamage) +
+                ' comes from equipped weapons)' + '\n\nYou can absorb ' + str(player.fighter.protection) + ' damage (' +
+                str(player.fighter.equipmentProtection) + ' comes from equipment)', CHARACTER_SCREEN_WIDTH)
 
             return 'didnt-take-turn'
 
@@ -458,7 +461,7 @@ def new_game():
     #Create our objects, in this case just a player, then add them to the objects array
     #Create a fighter component for the player. The player does not need an AI
     player_death = getattr(Fighter, 'player_death')
-    fighter_component = Fighter(hp = 30, defense = 2, power = 5, xp = 0, is_player = True,
+    fighter_component = Fighter(hp = 30, attack=2, defence = 2, strength=2, protection=0, xp = 0, is_player = True,
         death_function = player_death)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
         fighter = fighter_component, inventory=inventory)
@@ -523,16 +526,16 @@ def check_level_up():
         while choice == None:
             choice =  menu('Level up! Choose a stat to raise:\n',
                 ['Constitution (+20 HP, from ' + str(player.fighter.max_hp) + ')',
-                'Strength (+1 Attack, from ' + str(player.fighter.power) + ')',
-                'Agility (+1 Defense, from ' + str(player.fighter.defense) + ')'],
+                'Strength (+1 Attack, from ' + str(player.fighter.base_strength) + ')',
+                'Defence (+1 Defense, from ' + str(player.fighter.base_defence) + ')'],
                 LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
-            player.fighter.base_max_hp += 20
+            player.fighter.max_hp += 20
         elif choice == 1:
-            player.fighter.base_power += 1
+            player.fighter.base_strength += 1
         elif choice == 2:
-            player.fighter.base_defense += 1
+            player.fighter.base_defence += 1
 
 def save_game():
     global objects, map, inventory, game_msgs, game_state, stairs_down, dungeon_level

@@ -4,8 +4,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>5</hit-points>
-                <defense>0</defense>
-                <attack-power>1</attack-power>
+                <attack>1</attack>
+                <defence>0</defence>
+                <strength>1</strength>
+                <protection>0</protection>
                 <character>r</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -17,8 +19,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>10</hit-points>
-                <defense>0</defense>
-                <attack-power>2</attack-power>
+                <attack>2</attack>
+                <defence>0</defence>
+                <strength>2</strength>
+                <protection>0</protection>
                 <character>R</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -30,8 +34,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>7</hit-points>
-                <defense>0</defense>
-                <attack-power>2</attack-power>
+                <attack>2</attack>
+                <defence>0</defence>
+                <strength>0</strength>
+                <protection>0</protection>
                 <character>s</character>
                 <color-r>0</color-r>
                 <color-g>255</color-g>
@@ -43,8 +49,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>12</hit-points>
-                <defense>0</defense>
-                <attack-power>3</attack-power>
+                <attack>2</attack>
+                <defence>0</defence>
+                <strength>1</strength>
+                <protection>0</protection>
                 <character>S</character>
                 <color-r>0</color-r>
                 <color-g>255</color-g>
@@ -56,8 +64,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>5</hit-points>
-                <defense>0</defense>
-                <attack-power>1</attack-power>
+                <attack>1</attack>
+                <defence>0</defence>
+                <strength>0</strength>
+                <protection>0</protection>
                 <character>b</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -69,8 +79,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>8</hit-points>
-                <defense>0</defense>
-                <attack-power>2</attack-power>
+                <attack>1</attack>
+                <defence>1</defence>
+                <strength>0</strength>
+                <protection>0</protection>
                 <character>B</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -82,8 +94,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>15</hit-points>
-                <defense>1</defense>
-                <attack-power>4</attack-power>
+                <attack>2</attack>
+                <defence>0</defence>
+                <strength>2</strength>
+                <protection>1</protection>
                 <character>g</character>
                 <color-r>0</color-r>
                 <color-g>128</color-g>

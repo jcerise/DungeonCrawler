@@ -71,30 +71,32 @@ class AbstractMapGenerator():
 
             #Create a list with all the applicable monsters for this floor
             for monster in monster_root.findall('monster'):
-                m = []
-                m.append(monster.get('name'))
-                m.append(monster.find('type').text)
-                m.append(monster.find('ai-type').text)
-                m.append(monster.find('hit-points').text)
-                m.append(monster.find('defense').text)
-                m.append(monster.find('attack-power').text)
-                m.append(monster.find('character').text)
-                m.append(monster.find('color-r').text)
-                m.append(monster.find('color-g').text)
-                m.append(monster.find('color-b').text)
+                m = {}
+                m['name'] = monster.get('name')
+                m['type'] = monster.find('type').text
+                m['ai-type'] = monster.find('ai-type').text
+                m['hit-points'] = monster.find('hit-points').text
+                m['defence'] = monster.find('defence').text
+                m['attack'] = monster.find('attack').text
+                m['strength'] = monster.find('strength').text
+                m['protection'] = monster.find('protection').text
+                m['character'] = monster.find('character').text
+                m['color-r'] = monster.find('color-r').text
+                m['color-g'] = monster.find('color-g').text
+                m['color-b'] = monster.find('color-b').text
 
                 #Check for other levelled lists, an dif appropriate, add their monsters encounter chances at a
                 #reduced chance (25% for harder, and 50% for easier)
                 if index_counter == 1:
                     chance = int(monster.find('encounter-chance').text) * .25
-                    m.append(chance)
+                    m['encounter-chance']= chance
                 elif index_counter == 2:
                     chance = int(monster.find('encounter-chance').text) * .50
-                    m.append(chance)
+                    m['encounter-chance']= chance
                 else:
-                    m.append(monster.find('encounter-chance').text)
+                    m['encounter-chance'] = monster.find('encounter-chance').text
 
-                m.append(monster.find('xp').text)
+                m['xp'] = monster.find('xp').text
 
                 #Add the newly created monster list to the list of monsters
                 monsters.append(m)
@@ -106,7 +108,7 @@ class AbstractMapGenerator():
         monster_appearance_chances = []
 
         for appearing_monster in monsters:
-            monster_appearance_chances.append(int(appearing_monster[10]))
+            monster_appearance_chances.append(int(appearing_monster['encounter-chance']))
 
         return monsters, monster_appearance_chances
 
@@ -131,7 +133,7 @@ class AbstractMapGenerator():
             if item.find('type').text == 'equipment':
                 #We have a slightly different set of attributes for equipment
                 i['use'] = item.find('use').text
-                i['attack'] = item.find('attack').text
+                i['damage'] = item.find('damage').text
                 i['range'] = item.find('range').text
                 i['slot'] = item.find('slot').text
             else:
@@ -170,17 +172,19 @@ class AbstractMapGenerator():
         monster_death = getattr(Fighter, 'monster_death')
 
         #Create a component for the monster based on the monster type
-        if monster[1] == 'fighter':
-            fighter_component = Fighter(hp=int(monster[3]), defense=int(monster[4]), power=int(monster[5]),
-                                        xp=int(monster[11]), death_function=monster_death)
+        if monster['type'] == 'fighter':
+            fighter_component = Fighter(hp=int(monster['hit-points']), attack=int(monster['attack']),
+                                        defence=int(monster['defence']), strength=int(monster['strength']),
+                                        protection=int(monster['protection']), xp=int(monster['xp']),
+                                        death_function=monster_death)
 
         #Create an AI component for the monster based on its AI type
-        if monster[2] == 'basic':
+        if monster['ai-type'] == 'basic':
             ai_component = BasicMonster()
 
         #Finally, create the monster
-        monster = Object(x, y, char=monster[6], name=monster[0], color=libtcod.Color(int(monster[7]),
-                         int(monster[8]), int(monster[9])), blocks=True, fighter=fighter_component,  ai=ai_component)
+        monster = Object(x, y, char=monster['character'], name=monster['name'], color=libtcod.Color(int(monster['color-r']),
+                         int(monster['color-g']), int(monster['color-b'])), blocks=True, fighter=fighter_component,  ai=ai_component)
 
         return monster
 
@@ -196,7 +200,7 @@ class AbstractMapGenerator():
 
         if item['type'] == 'equipment':
             #This is a piece of equipment, so create equipment instead of a standard item
-            equipment = Equipment(item['slot'])
+            equipment = Equipment(item['slot'], item['type'], item['use'], item['damage'])
 
             item = Object(x, y, item['character'], item['name'], color=libtcod.Color(int(item['color-r']),
                           int(item['color-g']), int(item['color-b'])),equipment=equipment)

@@ -4,8 +4,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>50</hit-points>
-                <defense>5</defense>
-                <attack-power>8</attack-power>
+                <attack>2</attack>
+                <defence>1</defence>
+                <strength>2</strength>
+                <protection>1</protection>
                 <character>o</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -17,8 +19,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>75</hit-points>
-                <defense>8</defense>
-                <attack-power>7</attack-power>
+                <attack>3</attack>
+                <defence>2</defence>
+                <strength>3</strength>
+                <protection>0</protection>
                 <character>T</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -30,8 +34,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>45</hit-points>
-                <defense>2</defense>
-                <attack-power>8</attack-power>
+                <attack>2</attack>
+                <defence>2</defence>
+                <strength>1</strength>
+                <protection>1</protection>
                 <character>c</character>
                 <color-r>0</color-r>
                 <color-g>255</color-g>
@@ -43,8 +49,10 @@
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>50</hit-points>
-                <defense>7</defense>
-                <attack-power>7</attack-power>
+                <attack>2</attack>
+                <defence>1</defence>
+                <strength>2</strength>
+                <protection>1</protection>
                 <character>d</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -52,25 +60,14 @@
                 <encounter-chance>40</encounter-chance>
                 <xp>20</xp>
             </monster>
-            <monster name="Giant Bat">
-                <type>fighter</type>
-                <ai-type>basic</ai-type>
-                <hit-points>8</hit-points>
-                <defense>0</defense>
-                <attack-power>2</attack-power>
-                <character>B</character>
-                <color-r>191</color-r>
-                <color-g>191</color-g>
-                <color-b>191</color-b>
-                <encounter-chance>25</encounter-chance>
-                <xp>50</xp>
-            </monster>
             <monster name="Dragon">
                 <type>fighter</type>
                 <ai-type>basic</ai-type>
                 <hit-points>100</hit-points>
-                <defense>10</defense>
-                <attack-power>12</attack-power>
+                <attack>5</attack>
+                <defence>3</defence>
+                <strength>4</strength>
+                <protection>4</protection>
                 <character>D</character>
                 <color-r>0</color-r>
                 <color-g>128</color-g>
