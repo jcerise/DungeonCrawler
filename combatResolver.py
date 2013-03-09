@@ -30,7 +30,6 @@ class CombatResolver:
         #second round (only if the attacker hits) determines how much damage is dealt by the attacker to the defender.
 
         messages = []
-        #messages.append(['success', attacker.owner.name.capitalize() + ' attacks ' + defender.name + '!', libtcod.white])
 
         attackerAttack = attacker.base_attack + self.makeOEDRoll()
         defenderDefence = defender.fighter.base_defence + self.makeOEDRoll()

@@ -1,6 +1,6 @@
 import libtcodpy as libtcod
 from combatResolver import CombatResolver
-import math
+
 
 class Fighter:
     #A component that forms the basis for anything in the game that can fight, such as a monster, the player,
@@ -23,21 +23,21 @@ class Fighter:
     @property
     def damage(self):
         #Calculate how much damage this fighter deals, based on equipped weapons and base strength
-        bonus = sum(equipment.value for equipment in self.get_all_equipped_weapons(self.is_player))
+        bonus = sum(int(equipment.value) for equipment in self.get_all_equipped_weapons(self.is_player))
         return self.base_strength + bonus
 
     @property
     def equipmentDamage(self):
-        return sum(equipment.value for equipment in self.get_all_equipped_weapons(self.is_player))
+        return sum(int(equipment.value) for equipment in self.get_all_equipped_weapons(self.is_player))
 
     @property
     def equipmentProtection(self):
-        return sum(equipment.value for equipment in self.get_all_equipped_armor(self.is_player))
+        return sum(int(equipment.value) for equipment in self.get_all_equipped_armor(self.is_player))
 
     @property
     def protection(self):
         #Calculate how much protection this fighter has, based on equipped armors and base protection
-        bonus = sum(equipment.value for equipment in self.get_all_equipped_armor(self.is_player))
+        bonus = sum(int(equipment.value) for equipment in self.get_all_equipped_armor(self.is_player))
         return self.base_protection + bonus
 
     # @property
@@ -67,7 +67,7 @@ class Fighter:
             #Check through every item in the inventory
             for item in self.owner.inventory:
                 #If its equipment and equipped, add it to the returned list
-                if item.equipment and item.equipment.is_equipped and item.equipment.use is 'attack':
+                if item.equipment and item.equipment.is_equipped and item.equipment.use == 'attack':
                     equipped_list.append(item.equipment)
             return equipped_list
         else:
@@ -82,7 +82,7 @@ class Fighter:
             #Check through every item in the inventory
             for item in self.owner.inventory:
                 #If its equipment and equipped, add it to the returned list
-                if item.equipment and item.equipment.is_equipped and item.equipment.use is 'defense':
+                if item.equipment and item.equipment.is_equipped and item.equipment.use == 'defense':
                     equipped_list.append(item.equipment)
             return equipped_list
         else:

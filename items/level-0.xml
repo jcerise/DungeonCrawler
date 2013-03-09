@@ -144,4 +144,52 @@
                 <color-b>0</color-b>
                 <encounter-chance>80</encounter-chance>
             </item>
+            <item name="Battered cuirass">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>2</damage>
+                <range>1</range>
+                <slot>torso</slot>
+                <character>[</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Battered gloves">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>hands</slot>
+                <character>;</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Battered greaves">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>legs</slot>
+                <character>{</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
+            <item name="Battered boots">
+                <type>equipment</type>
+                <use>defense</use>
+                <damage>1</damage>
+                <range>1</range>
+                <slot>feet</slot>
+                <character>"</character>
+                <color-r>255</color-r>
+                <color-g>255</color-g>
+                <color-b>0</color-b>
+                <encounter-chance>80</encounter-chance>
+            </item>
         </level-zero-items>
