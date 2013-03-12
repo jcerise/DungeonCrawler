@@ -7,7 +7,7 @@ class Object:
     #Represents a generic object within the game; A chair, a player, an orc, stairs
     #This object is always represented by a character on the screen
     def __init__(self, x, y, char, name, color, blocks=False, fighter=None, ai=None, item=None,
-                 equipment=None, inventory=None):
+                 equipment=None, inventory=None, description=None):
         self.x = x
         self.y = y
         self.char = char
@@ -37,7 +37,7 @@ class Object:
             self.equipment.owner = self
             #equipment is technically an item, so we need an item component for it to work properly
             #We also need to to set the type of the item to equipment
-            self.item = Item(type='equipment')
+            self.item = Item(type='equipment', description=description)
             self.item.owner = self
 
     def move(self, gameMap, dx, dy, blocked):

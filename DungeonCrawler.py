@@ -136,6 +136,7 @@ def handle_keys():
     global inventory
     global objects
     global stairs_down
+    global examineText
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         #ALT + Enter, toggle fullscreen
@@ -192,6 +193,14 @@ def handle_keys():
                 chosen_item = inventory_menu('Press the key of the item you wish to drop, or any other to cancel.\n')
                 if chosen_item is not None:
                     print_messages(chosen_item.drop(objects, inventory, player))
+
+            if key_char == 'e':
+                #show the inventory, and if an item is selected, show the examine screen for it
+                chosen_item = inventory_menu('Press the key of the item you wish to examine, or any other key to '
+                                             'cancel.\n')
+                if chosen_item is not None:
+                    examineText = 'Examining ' + chosen_item.owner.name + '\n\n' + chosen_item.description
+                    return 'examining'
 
             if key_char == 'c':
                 #Show the character sheet
@@ -318,7 +327,7 @@ def main_menu():
 
 
 def msgbox(text, width = 50):
-    #Create a menu as quick and dirty message box
+    #Create a menu as a quick and dirty message box
     menu(text, [], width)
 
 def inventory_menu(header):
@@ -585,7 +594,7 @@ def initialize_fov():
 
 def play_game():
     #Start up the main game loop so the game can begin playing
-    global key, mouse, game_state
+    global key, mouse, game_state, examineText
 
     player_action = None
 
@@ -618,14 +627,23 @@ def play_game():
         if not player_alive:
             game_state = 'dead'
 
+
         #Let the monsters take their turn
-        if game_state == 'playing' and player_action != 'didnt-take-turn':
+        if game_state == 'playing' and player_action != 'didnt-take-turn' and player_action != 'examining':
             for object in objects:
                 if object.ai:
                     messages = object.ai.take_turn(map, fov_map, player, objects)
                     if len(messages) > 0:
                         for success, line, color in messages:
                             message(line, color)
+        elif player_action == 'examining':
+            #The player is examining an item. We need to clear any other menus (such as the examine menu) so the
+            #examine details screen can show
+            render_all()
+            libtcod.console_flush()
+            #Show the examine details screen
+            msgbox(examineText, CHARACTER_SCREEN_WIDTH)
+
 
 
 #####################################

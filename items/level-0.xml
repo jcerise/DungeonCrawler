@@ -99,6 +99,7 @@
             <item name="Bent dagger">
                 <type>equipment</type>
                 <use>attack</use>
+                <description>An old, bent dagger. Its obviously been used quite a bit, judging by the dull edges and rust spots all over it. The point is also bent. Great.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>right-hand</slot>
@@ -111,6 +112,7 @@
             <item name="Rusty sword">
                 <type>equipment</type>
                 <use>attack</use>
+                <description>Judging by the rust covering this sword, its last owner is long gone. The edges look none too sharp.</description>
                 <damage>2</damage>
                 <range>1</range>
                 <slot>right-hand</slot>
@@ -123,6 +125,7 @@
             <item name="Battered shield">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>This shield has seen better days. You can faintly make out some sigil painted in the front. The leather arm straps are starting to rot away.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>left-hand</slot>
@@ -135,6 +138,7 @@
             <item name="Battered helm">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>Just a battered, dented, rusty helm.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>head</slot>
@@ -147,6 +151,7 @@
             <item name="Battered cuirass">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>Just a very battered, old cuirass.</description>
                 <damage>2</damage>
                 <range>1</range>
                 <slot>torso</slot>
@@ -159,6 +164,7 @@
             <item name="Battered gloves">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>Just a battered pair of greaves.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>hands</slot>
@@ -171,6 +177,7 @@
             <item name="Battered greaves">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>Just a battered pair of greaves.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>legs</slot>
@@ -183,6 +190,7 @@
             <item name="Battered boots">
                 <type>equipment</type>
                 <use>defense</use>
+                <description>Just a battered pair of boots.</description>
                 <damage>1</damage>
                 <range>1</range>
                 <slot>feet</slot>

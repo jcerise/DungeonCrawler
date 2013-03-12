@@ -4,7 +4,7 @@ from magic.spell import *
 
 class Item:
     #Defines an item that can be picked up and used
-    def __init__(self, value=0, range=0, use_function=None, targeting=None, type=None):
+    def __init__(self, value=0, range=0, use_function=None, targeting=None, type=None, description='Test'):
         #The value of an item determines how much it does of whatever it does (healing, damage, fatigue restore etc)
         self.value = value
         self.range = range
@@ -15,6 +15,7 @@ class Item:
 
         #We need to keep track of a type, as equipment works differently, and we need to be able to handle it as such
         self.type = type
+        self.description = description
 
     def pick_up(self, inventory, objects):
         #Check if the players inventory is full or not

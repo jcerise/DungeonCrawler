@@ -133,6 +133,7 @@ class AbstractMapGenerator():
             if item.find('type').text == 'equipment':
                 #We have a slightly different set of attributes for equipment
                 i['use'] = item.find('use').text
+                i['description'] = item.find('description').text
                 i['damage'] = item.find('damage').text
                 i['range'] = item.find('range').text
                 i['slot'] = item.find('slot').text
@@ -203,7 +204,8 @@ class AbstractMapGenerator():
             equipment = Equipment(item['slot'], item['type'], item['use'], item['damage'])
 
             item = Object(x, y, item['character'], item['name'], color=libtcod.Color(int(item['color-r']),
-                          int(item['color-g']), int(item['color-b'])),equipment=equipment)
+                          int(item['color-g']), int(item['color-b'])),equipment=equipment,
+                          description=item['description'])
         else:
             #Create an object and item component from the loaded values
             item_component = Item(value=int(item['value']), range=int(item['range']), use_function=item_use_function,
