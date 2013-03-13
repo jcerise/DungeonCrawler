@@ -199,7 +199,18 @@ def handle_keys():
                 chosen_item = inventory_menu('Press the key of the item you wish to examine, or any other key to '
                                              'cancel.\n')
                 if chosen_item is not None:
-                    examineText = 'Examining ' + chosen_item.owner.name + '\n\n' + chosen_item.description
+                    #We need to handle equipment a little differently, as it can have different values based on its type
+                    if chosen_item.type == 'equipment':
+                        examineText = chosen_item.owner.name + '\n\n' + chosen_item.description + '\n\n'
+                        if chosen_item.owner.equipment.use == 'attack':
+                            #Add a value for damage
+                            examineText += 'Damage: ' + chosen_item.owner.equipment.value
+                        elif chosen_item.owner.equipment.use == 'defense':
+                            #add a value for defense
+                            examineText += 'Defense: ' + chosen_item.owner.equipment.value
+                        examineText += '\nEquips on: ' + chosen_item.owner.equipment.slot
+                    else:
+                        examineText = chosen_item.owner.name + '\n\n' + chosen_item.description + '\n\n'
                     return 'examining'
 
             if key_char == 'c':

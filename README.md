@@ -37,6 +37,7 @@ Controls
 + i = Open Inventory
 + d = Open Drop menu (selected item is dropped from inventory)
 + c = View Character information
++ e = Examine an item
 + > = Go down stairs (when directly on top of stairs)
 + a..z = When in inventory screen, use item at index [char]
 + g = pick up item currently under player
