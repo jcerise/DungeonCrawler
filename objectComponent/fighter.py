@@ -7,13 +7,21 @@ class Fighter:
     #or an NPC.
     #Each action method (take_damage, attack, etc, returns a list of messages that will be printed to the console,
     #so the player knows whats going on. Each message has a color associated with it
-    def __init__(self, hp, attack, defence, strength, protection, xp, is_player = False, death_function = None):
+    def __init__(self, hp, attack, defence, strength, protection, agility, accuracy, xp, is_player = False, death_function = None):
         self.hp = hp
         self.max_hp = hp
+        #Base chance to avoid attack. This is improved by agility
         self.base_defence = defence
+        #Base chance to hit, this is improved by accuracy
         self.base_attack = attack
+        #Determines damage dealt
         self.base_strength = strength
+        #Determines damage reduction
         self.base_protection = protection
+        #Determines chance of hitting
+        self.base_accuracy = accuracy
+        #Determines chance of dodging attacks
+        self.base_agility = agility
         self.xp = xp
         self.death_function = death_function
         self.is_player = is_player

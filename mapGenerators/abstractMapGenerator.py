@@ -80,6 +80,8 @@ class AbstractMapGenerator():
                 m['attack'] = monster.find('attack').text
                 m['strength'] = monster.find('strength').text
                 m['protection'] = monster.find('protection').text
+                m['agility'] = monster.find('agility').text
+                m['accuracy'] = monster.find('accuracy').text
                 m['character'] = monster.find('character').text
                 m['color-r'] = monster.find('color-r').text
                 m['color-g'] = monster.find('color-g').text
@@ -176,7 +178,8 @@ class AbstractMapGenerator():
         if monster['type'] == 'fighter':
             fighter_component = Fighter(hp=int(monster['hit-points']), attack=int(monster['attack']),
                                         defence=int(monster['defence']), strength=int(monster['strength']),
-                                        protection=int(monster['protection']), xp=int(monster['xp']),
+                                        protection=int(monster['protection']), agility=int(monster['agility']),
+                                        accuracy=int(monster['accuracy']), xp=int(monster['xp']),
                                         death_function=monster_death)
 
         #Create an AI component for the monster based on its AI type

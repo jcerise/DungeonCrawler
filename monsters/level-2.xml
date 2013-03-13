@@ -8,6 +8,8 @@
                 <defence>1</defence>
                 <strength>0</strength>
                 <protection>0</protection>
+                <agility>0</agility>
+                <accuracy>0</accuracy>
                 <character>a</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -23,6 +25,8 @@
                 <defence>1</defence>
                 <strength>1</strength>
                 <protection>0</protection>
+                <agility>0</agility>
+                <accuracy>1</accuracy>
                 <character>k</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -38,6 +42,8 @@
                 <defence>0</defence>
                 <strength>2</strength>
                 <protection>0</protection>
+                <agility>-1</agility>
+                <accuracy>0</accuracy>
                 <character>z</character>
                 <color-r>0</color-r>
                 <color-g>255</color-g>
@@ -53,6 +59,8 @@
                 <defence>0</defence>
                 <strength>0</strength>
                 <protection>0</protection>
+                <agility>-2</agility>
+                <accuracy>0</accuracy>
                 <character>C</character>
                 <color-r>0</color-r>
                 <color-g>255</color-g>
@@ -68,6 +76,8 @@
                 <defence>0</defence>
                 <strength>0</strength>
                 <protection>0</protection>
+                <agility>2</agility>
+                <accuracy>0</accuracy>
                 <character>b</character>
                 <color-r>191</color-r>
                 <color-g>191</color-g>
@@ -83,6 +93,8 @@
                 <defence>1</defence>
                 <strength>2</strength>
                 <protection>1</protection>
+                <agility>0</agility>
+                <accuracy>1</accuracy>
                 <character>h</character>
                 <color-r>0</color-r>
                 <color-g>128</color-g>

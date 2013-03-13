@@ -219,6 +219,7 @@ def handle_keys():
                 msgbox('Character Information\n\nLevel: ' + str(player.level) + '\nExperience: ' + str(player.fighter.xp) +
                 '\nExperience to Level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
                 '\nStrength: ' + str(player.fighter.base_strength) + '\nDefense: ' + str(player.fighter.base_defence) +
+                '\nAgility: ' + str(player.fighter.base_agility) + '\nAccuracy: ' + str(player.fighter.base_accuracy) +
                 '\n\nYou are capable of dealing ' + str(player.fighter.damage) + ' damage (' + str(player.fighter.equipmentDamage) +
                 ' comes from equipped weapons)' + '\n\nYou can absorb ' + str(player.fighter.protection) + ' damage (' +
                 str(player.fighter.equipmentProtection) + ' comes from equipment)', CHARACTER_SCREEN_WIDTH)
@@ -481,10 +482,10 @@ def new_game():
     #Create our objects, in this case just a player, then add them to the objects array
     #Create a fighter component for the player. The player does not need an AI
     player_death = getattr(Fighter, 'player_death')
-    fighter_component = Fighter(hp = 30, attack=2, defence = 2, strength=2, protection=0, xp = 0, is_player = True,
-        death_function = player_death)
+    fighter_component = Fighter(hp=30, attack=2, defence=2, strength=2, protection=0, agility=0, accuracy=0, xp=0,
+                                is_player=True, death_function=player_death)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
-        fighter = fighter_component, inventory=inventory)
+                    fighter=fighter_component, inventory=inventory)
     player.x = player_start_x
     player.y = player_start_y
 
@@ -543,12 +544,14 @@ def check_level_up():
         message('Your prowess at survival has increased! You reached level ' + str(player.level) + '!', libtcod.yellow)
 
         choice = None
-        while choice == None:
-            choice =  menu('Level up! Choose a stat to raise:\n',
-                ['Constitution (+20 HP, from ' + str(player.fighter.max_hp) + ')',
-                'Strength (+1 Attack, from ' + str(player.fighter.base_strength) + ')',
-                'Defence (+1 Defense, from ' + str(player.fighter.base_defence) + ')'],
-                LEVEL_SCREEN_WIDTH)
+        while choice is None:
+            choice = menu('Level up! Choose a stat to raise:\n',
+                          ['Constitution (+20 HP, from ' + str(player.fighter.max_hp) + ')',
+                           'Strength (+1 Attack, from ' + str(player.fighter.base_strength) + ')',
+                           'Defence (+1 Defense, from ' + str(player.fighter.base_defence) + ')',
+                           'Agility (+1 to dodge, from ' + str(player.fighter.base_agility) + ')',
+                           'Accuracy (+1 to hit, from ' + str(player.fighter.base_accuracy)],
+                          LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
             player.fighter.max_hp += 20
@@ -556,6 +559,10 @@ def check_level_up():
             player.fighter.base_strength += 1
         elif choice == 2:
             player.fighter.base_defence += 1
+        elif choice == 3:
+            player.fighter.base_agility += 1
+        elif choice == 4:
+            player.fighter.base_accuracy += 1
 
 def save_game():
     global objects, map, inventory, game_msgs, game_state, stairs_down, dungeon_level

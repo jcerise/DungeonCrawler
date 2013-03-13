@@ -31,8 +31,8 @@ class CombatResolver:
 
         messages = []
 
-        attackerAttack = attacker.base_attack + self.makeOEDRoll()
-        defenderDefence = defender.fighter.base_defence + self.makeOEDRoll()
+        attackerAttack = attacker.base_attack + attacker.base_accuracy + self.makeOEDRoll()
+        defenderDefence = defender.fighter.base_defence + defender.fighter.base_agility + self.makeOEDRoll()
 
         #Compare the two values. if the attackers is larger, the attacker hits. If not, the defender has dodged the blow
         if attackerAttack > defenderDefence:
