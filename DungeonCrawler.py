@@ -21,12 +21,12 @@ from fighterAi.basic import *
 #This will allow for creation of objects before the map has been initialized.
 
 #Set the size of our window
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
+SCREEN_WIDTH = 100
+SCREEN_HEIGHT = 80
 
 #Set the size of our playable map
-MAP_WIDTH = 80
-MAP_HEIGHT = 43
+MAP_WIDTH = SCREEN_WIDTH - (SCREEN_WIDTH / 4) - 1
+MAP_HEIGHT = SCREEN_HEIGHT - (SCREEN_HEIGHT / 6) - 1
 
 #Set the framerate limit. We do not use this, as our game is turn based, not real time
 LIMIT_FPS = 20
@@ -49,14 +49,17 @@ TORCH_RADIUS = 4
 
 #Sizes and Coordinates for the GUI
 BAR_WIDTH = 20
-PANEL_HEIGHT = 7
+PANEL_HEIGHT = (SCREEN_HEIGHT / 6) - 1
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 INVENTORY_WIDTH = 50
+
+INFO_WIDTH = (SCREEN_WIDTH / 4) - 2
+INFO_HEIGHT = MAP_HEIGHT
 
 #Message log constants
 MSG_X = BAR_WIDTH + 2
 MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
-MSG_HEIGHT = PANEL_HEIGHT - 1
+MSG_HEIGHT = PANEL_HEIGHT - 3
 
 #Monster and object settings
 MAX_ROOM_MONSTERS = 3
@@ -143,6 +146,8 @@ def handle_keys():
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         #Escape, exit game
+        libtcod.console_set_default_background(0, libtcod.black)
+        libtcod.console_clear(0)
         return 'exit'
 
     #Handle movement keys
@@ -312,7 +317,7 @@ def main_menu():
 
     while not libtcod.console_is_window_closed():
         #Show the image at twice its usual resolution of the console
-        libtcod.image_blit_2x(img, 0, 0, 0)
+        libtcod.image_blit_2x(img, 0, SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6)
 
         #Show the games title, and some credits
         libtcod.console_set_default_foreground(0, libtcod.light_yellow)
@@ -326,10 +331,15 @@ def main_menu():
 
         if choice == 0:
             #Start a new game
+            #Clear the base conosle, so the menu image and options don't show up under the rest of the UI
+            libtcod.console_set_default_background(0, libtcod.brass)
+            libtcod.console_clear(0)
             new_game()
             play_game()
         elif choice == 1:
             try:
+                libtcod.console_set_default_background(0, libtcod.brass)
+                libtcod.console_clear(0)
                 load_game()
             except:
                 msgbox('\n No saved game to load!\n', 24)
@@ -420,7 +430,8 @@ def render_all():
     #Draw the player last so it appears on top of everything else
     player.draw(fov_map, con)
 
-    libtcod.console_blit(con, 0, 0, MAP_WIDTH, MAP_HEIGHT, 0, 0, 0)
+    #Blit the map console onto the screen
+    libtcod.console_blit(con, 0, 0, MAP_WIDTH, MAP_HEIGHT, 0, 1, 1)
 
     #Prepare to render the GUI panel
     libtcod.console_set_default_background(panel, libtcod.black)
@@ -449,8 +460,12 @@ def render_all():
         y += 1
 
     #Blit the new console for the GUI onto the screen
-    libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
+    libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH - 2, PANEL_HEIGHT - 1, 0, 1, PANEL_Y)
 
+    #Blit the info panel onto the screen
+    libtcod.console_set_default_background(info, libtcod.darker_sepia)
+    libtcod.console_clear(info)
+    libtcod.console_blit(info, 0, 0, INFO_WIDTH, INFO_HEIGHT, 0, MAP_WIDTH + 2, 1)
 
 def new_game():
     #Initialize all the components needed to start up a new game
@@ -682,6 +697,9 @@ libtcod.sys_set_fps(LIMIT_FPS)
 
 #Create a panel for the GUI
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+
+#Create a console for the info panel
+info = libtcod.console_new(INFO_WIDTH, INFO_HEIGHT)
 
 #Present the player with the main menu
 main_menu()
