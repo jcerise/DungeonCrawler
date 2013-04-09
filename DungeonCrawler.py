@@ -454,6 +454,10 @@ def render_all():
     libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH - 2, PANEL_HEIGHT - 1, 0, 1, PANEL_Y)
 
     #Blit the info panel onto the screen
+    render_info_panel(info)
+
+
+def render_info_panel(console):
     libtcod.console_set_default_background(info, libtcod.darker_sepia)
     libtcod.console_set_default_foreground(info, libtcod.light_gray)
     libtcod.console_clear(info)
@@ -471,18 +475,18 @@ def render_all():
                libtcod.light_blue, libtcod.darker_blue)
 
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 13, libtcod.BKGND_NONE, libtcod.RIGHT, 'Strength: ' +
-                             str(player.fighter.base_strength))
+                                                                                          str(player.fighter.base_strength))
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 15, libtcod.BKGND_NONE, libtcod.RIGHT, 'Defense: ' +
-                             str(player.fighter.base_defence))
+                                                                                          str(player.fighter.base_defence))
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 17, libtcod.BKGND_NONE, libtcod.RIGHT, 'Agility: ' +
-                             str(player.fighter.base_agility))
+                                                                                          str(player.fighter.base_agility))
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 19, libtcod.BKGND_NONE, libtcod.RIGHT, 'Accuracy: ' +
-                             str(player.fighter.base_accuracy))
+                                                                                          str(player.fighter.base_accuracy))
 
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 22, libtcod.BKGND_NONE, libtcod.CENTER, 'Damage: ' +
-                             str(player.fighter.base_strength) + ' (+' + str(player.fighter.equipmentDamage) + ')')
+                                                                                           str(player.fighter.base_strength) + ' (+' + str(player.fighter.equipmentDamage) + ')')
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 24, libtcod.BKGND_NONE, libtcod.CENTER, 'Protection: ' +
-                             str(player.fighter.base_protection) + ' (+' + str(player.fighter.equipmentProtection) + ')')
+                                                                                           str(player.fighter.base_protection) + ' (+' + str(player.fighter.equipmentProtection) + ')')
 
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 26, libtcod.BKGND_NONE, libtcod.CENTER, '---------------------------')
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 28, libtcod.BKGND_NONE, libtcod.CENTER, 'Equipment')
