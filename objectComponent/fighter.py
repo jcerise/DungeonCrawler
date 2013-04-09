@@ -22,6 +22,7 @@ class Fighter:
         self.base_accuracy = accuracy
         #Determines chance of dodging attacks
         self.base_agility = agility
+        #TODO: Add willpower and intelligence. Intelligence will modify casting results, willpower will determine mana
         self.xp = xp
         self.death_function = death_function
         self.is_player = is_player

@@ -371,22 +371,22 @@ def inventory_menu(header):
     if index is None or len(inventory) == 0: return None
     return inventory[index].item
 
-def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
+def render_bar(console, x, y, total_width, name, value, maximum, bar_color, back_color):
     #Build and render a status bar (health, mana, experience, etc)
     bar_width = int(float(value) / maximum * total_width)
 
     #Render the background first
-    libtcod.console_set_default_background(panel, back_color)
-    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+    libtcod.console_set_default_background(console, back_color)
+    libtcod.console_rect(console, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
 
     #Now, render the bar on top
-    libtcod.console_set_default_background(panel, bar_color)
+    libtcod.console_set_default_background(console, bar_color)
     if bar_width > 0:
-        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+        libtcod.console_rect(console, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
 
     #Finally, put the name of the bar, and the actual values on top of everything, for clarity
-    libtcod.console_set_default_foreground(panel, libtcod.white)
-    libtcod.console_print_ex(panel, x + total_width / 2, y, libtcod.BKGND_NONE, libtcod.CENTER,
+    libtcod.console_set_default_foreground(console, libtcod.white)
+    libtcod.console_print_ex(console, x + total_width / 2, y, libtcod.BKGND_NONE, libtcod.CENTER,
         name + ': ' + str(value) + '/' + str(maximum))
 
 def render_all():
@@ -437,16 +437,7 @@ def render_all():
     libtcod.console_set_default_background(panel, libtcod.black)
     libtcod.console_clear(panel)
 
-    #Show the players stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
-        libtcod.light_red, libtcod.darker_red)
-
-    level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
-
-    render_bar(1, 2, BAR_WIDTH, 'XP', player.fighter.xp, level_up_xp,
-        libtcod.light_yellow, libtcod.darker_yellow)
-
-    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(dungeon_level))
+    libtcod.console_print_ex(panel, 1, 1, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(dungeon_level))
 
     #Display the names of objects under the mouse
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
@@ -464,7 +455,94 @@ def render_all():
 
     #Blit the info panel onto the screen
     libtcod.console_set_default_background(info, libtcod.darker_sepia)
+    libtcod.console_set_default_foreground(info, libtcod.light_gray)
     libtcod.console_clear(info)
+
+    #Print out the characters name, class, and level
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 1, libtcod.BKGND_NONE, libtcod.CENTER, 'Jeraman the Green')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 3, libtcod.BKGND_NONE, libtcod.CENTER, 'Novice Adventurer')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 5, libtcod.BKGND_NONE, libtcod.CENTER, 'Level: ' + str(player.level))
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 7, libtcod.BKGND_NONE, libtcod.CENTER, '---------------------------')
+
+    #Show the players stats
+    render_bar(info, 2, 9, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
+               libtcod.light_red, libtcod.darker_red)
+    render_bar(info, 2, 11, BAR_WIDTH, 'MANA', 30, 30,
+               libtcod.light_blue, libtcod.darker_blue)
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 13, libtcod.BKGND_NONE, libtcod.RIGHT, 'Strength: ' +
+                             str(player.fighter.base_strength))
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 15, libtcod.BKGND_NONE, libtcod.RIGHT, 'Defense: ' +
+                             str(player.fighter.base_defence))
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 17, libtcod.BKGND_NONE, libtcod.RIGHT, 'Agility: ' +
+                             str(player.fighter.base_agility))
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 19, libtcod.BKGND_NONE, libtcod.RIGHT, 'Accuracy: ' +
+                             str(player.fighter.base_accuracy))
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 22, libtcod.BKGND_NONE, libtcod.CENTER, 'Damage: ' +
+                             str(player.fighter.base_strength) + ' (+' + str(player.fighter.equipmentDamage) + ')')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 24, libtcod.BKGND_NONE, libtcod.CENTER, 'Protection: ' +
+                             str(player.fighter.base_protection) + ' (+' + str(player.fighter.equipmentProtection) + ')')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 26, libtcod.BKGND_NONE, libtcod.CENTER, '---------------------------')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 28, libtcod.BKGND_NONE, libtcod.CENTER, 'Equipment')
+
+    #Loop through the inventory, and identify all equipped items and their equipment slot
+    equipped_items = {}
+    for item in inventory:
+        text = item.name
+        if item.equipment and item.equipment.is_equipped:
+            equipped_items[item.equipment.slot] = text
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 14, 30, libtcod.BKGND_NONE, libtcod.LEFT, 'Head:')
+    if 'head' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 31, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['head'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 31, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 5, 33, libtcod.BKGND_NONE, libtcod.CENTER, 'Torso:')
+    if 'torso' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 34, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['torso'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 34, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 12, 36, libtcod.BKGND_NONE, libtcod.LEFT, 'Left hand:')
+    if 'left-hand' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 37, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['left-hand'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 37, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 12, 39, libtcod.BKGND_NONE, libtcod.LEFT, 'Right hand:')
+    if 'right-hand' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 40, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['right-hand'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 40, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 5, 42, libtcod.BKGND_NONE, libtcod.CENTER, 'Gloves:')
+    if 'hands' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 43, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['hands'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 43, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 14, 45, libtcod.BKGND_NONE, libtcod.LEFT, 'Legs:')
+    if 'legs' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 46, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['legs'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 46, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 14, 48, libtcod.BKGND_NONE, libtcod.LEFT, 'Feet:')
+    if 'feet' in equipped_items:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 49, libtcod.BKGND_NONE, libtcod.CENTER, equipped_items['feet'])
+    else:
+        libtcod.console_print_ex(info, INFO_WIDTH / 2, 49, libtcod.BKGND_NONE, libtcod.CENTER, 'N/A')
+
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 51, libtcod.BKGND_NONE, libtcod.CENTER, '---------------------------')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 52, libtcod.BKGND_NONE, libtcod.CENTER, 'Experience')
+
+    level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
+
+    render_bar(info, 2, 54, BAR_WIDTH, 'XP', player.fighter.xp, level_up_xp,
+               libtcod.light_yellow, libtcod.darker_yellow)
     libtcod.console_blit(info, 0, 0, INFO_WIDTH, INFO_HEIGHT, 0, MAP_WIDTH + 2, 1)
 
 def new_game():
