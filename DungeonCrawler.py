@@ -275,11 +275,15 @@ def menu(header, options, width):
         header_height = 0
     height = len(options) + header_height
 
-    #Create an offscreen console that represents the menus window
+    #Create an offscreen console that represents the menus window, and a slightly larger one to nest the menu inside of
+    #This will create a border effect for the inner menu, strictly asthetic
+    outer_window = libtcod.console_new(width + 2, height + 2)
     window = libtcod.console_new(width, height)
 
     #Print the header to our offscreen console
     libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_set_default_background(window, libtcod.darker_sepia)
+    libtcod.console_clear(window)
     libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
 
     #Print all the options, with a corresponding ASCII character
@@ -295,11 +299,20 @@ def menu(header, options, width):
     #Blit the contents of the window to the main game screen, centered
     x = SCREEN_WIDTH / 2 - width / 2
     y = SCREEN_HEIGHT /2 - height / 2
-    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
+    #Set up the outer window (which only acts as a border for the inner window, strictly graphical)
+    libtcod.console_set_default_background(outer_window, libtcod.brass)
+    libtcod.console_clear(outer_window)
+    #Blit the actual message window onto the outer window, centered and one off from the borders
+    libtcod.console_blit(window, 0, 0, width, height, outer_window, 1, 1)
+    #Blit the outer window onto the screen, centered
+    libtcod.console_blit(outer_window, 0, 0, width + 2, height + 2, 0, x, y)
     #Now that the console is presented to the player, wait for them to make a choice before doing anything else
     libtcod.console_flush()
     key = libtcod.console_wait_for_keypress(True)
+
+    #Clear the main console, so no artifacts from the menu appear
+    libtcod.console_clear(0)
 
     #Check for fullscreen keys
     if key.vk == libtcod.KEY_ENTER and key.lalt:
