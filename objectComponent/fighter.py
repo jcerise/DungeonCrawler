@@ -49,11 +49,6 @@ class Fighter:
         bonus = sum(int(equipment.value) for equipment in self.get_all_equipped_armor(self.is_player))
         return self.base_protection + bonus
 
-    # @property
-    # def max_hp(self):
-    #     bonus = sum(equipment.max_hp_bonus for equipment in self.get_all_equipped(self.is_player))
-    #     return self.base_max_hp + bonus
-
     def __getstate__(self):
         #We need to remove the death function call, as it creates an instance method exception when pickling
         result = self.__dict__.copy()

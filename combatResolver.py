@@ -41,7 +41,7 @@ class CombatResolver:
             damageDealt = result[1]
         else:
             messages.append(['success', defender.name.capitalize() + ' has evaded the attack by  ' + attacker.owner.name,
-                             libtcod.white])
+                             libtcod.lighter_blue])
             damageDealt = 0
 
         return messages, damageDealt
@@ -57,5 +57,11 @@ class CombatResolver:
         if dealtDamage <= 0:
             dealtDamage = 0
 
+        #If no damage was dealt, make the message white, so as not to draw as much attention to it
+        if dealtDamage is 0:
+            color = libtcod.white
+        else:
+            color = libtcod.light_red
+
         return [['success', attacker.owner.name.capitalize() + ' hits the ' + defender.name + ' for ' + str(dealtDamage) +
-                           ' damage!', libtcod.white], dealtDamage]
+                           ' damage!', color], dealtDamage]
