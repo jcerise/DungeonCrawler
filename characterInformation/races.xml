@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<races>
+    <race name="Human">
+        <str_bonus>0</str_bonus>
+        <prot_bonus>0</prot_bonus>
+        <agi_bonus>0</agi_bonus>
+        <acc_bonus>0</acc_bonus>
+        <wil_bonus>0</wil_bonus>
+        <int_bonus>0</int_bonus>
+        <hit_die>8</hit_die>
+        <infra>0</infra>
+        <exp_bonus>1</exp_bonus>
+    </race>
+    <race name="Elf">
+        <str_bonus>-1</str_bonus>
+        <prot_bonus>0</prot_bonus>
+        <agi_bonus>2</agi_bonus>
+        <acc_bonus>1</acc_bonus>
+        <wil_bonus>1</wil_bonus>
+        <int_bonus>1</int_bonus>
+        <hit_die>8</hit_die>
+        <infra>0</infra>
+        <exp_bonus>1.5</exp_bonus>
+    </race>
+    <race name="Dwarf">
+        <str_bonus>2</str_bonus>
+        <prot_bonus>1</prot_bonus>
+        <agi_bonus>-1</agi_bonus>
+        <acc_bonus>0</acc_bonus>
+        <wil_bonus>0</wil_bonus>
+        <int_bonus>0</int_bonus>
+        <hit_die>10</hit_die>
+        <infra>20</infra>
+        <exp_bonus>1.4</exp_bonus>
+    </race>
+    <race name="Halfling">
+        <str_bonus>-2</str_bonus>
+        <prot_bonus>2</prot_bonus>
+        <agi_bonus>2</agi_bonus>
+        <acc_bonus>0</acc_bonus>
+        <wil_bonus>0</wil_bonus>
+        <int_bonus>-1</int_bonus>
+        <hit_die>8</hit_die>
+        <infra>0</infra>
+        <exp_bonus>1.8</exp_bonus>
+    </race>
+    <race name="Gnome">
+        <str_bonus>-1</str_bonus>
+        <prot_bonus>1</prot_bonus>
+        <agi_bonus>1</agi_bonus>
+        <acc_bonus>0</acc_bonus>
+        <wil_bonus>1</wil_bonus>
+        <int_bonus>1</int_bonus>
+        <hit_die>6</hit_die>
+        <infra>10</infra>
+        <exp_bonus>2</exp_bonus>
+    </race>
+</races>

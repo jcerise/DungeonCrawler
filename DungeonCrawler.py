@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 import textwrap
 import shelve
+import time
+import random
 from random import randrange
 
 from mapGenerators.standardDungeon import *
@@ -55,6 +57,9 @@ INVENTORY_WIDTH = 50
 
 INFO_WIDTH = (SCREEN_WIDTH / 4) - 2
 INFO_HEIGHT = MAP_HEIGHT
+
+CHARACTER_GEN_WIDTH = SCREEN_WIDTH - 1
+CHARACTER_GEN_HEIGHT = SCREEN_HEIGHT - 1
 
 #Message log constants
 MSG_X = BAR_WIDTH + 2
@@ -309,6 +314,11 @@ def menu(header, options, width):
     libtcod.console_blit(outer_window, 0, 0, width + 2, height + 2, 0, x, y)
     #Now that the console is presented to the player, wait for them to make a choice before doing anything else
     libtcod.console_flush()
+
+    #Make the thread sleep for a brief moment, else sometimes the keypress used to activate the menu will also
+    #make a choice
+    time.sleep(0.1)
+    #grab the key choice from the player
     key = libtcod.console_wait_for_keypress(True)
 
     #Clear the main console, so no artifacts from the menu appear
@@ -321,7 +331,9 @@ def menu(header, options, width):
 
     #Convert the ASCII code to an index; if it corresponds to a valid menu item, return it
     index = key.c - ord('a')
-    if index >= 0 and index < len(options): return index
+    if index >= 0 and index < len(options):
+        return index
+
     return None
 
 def main_menu():
@@ -477,7 +489,7 @@ def render_info_panel(console):
 
     #Print out the characters name, class, and level
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 1, libtcod.BKGND_NONE, libtcod.CENTER, 'Jeraman the Green')
-    libtcod.console_print_ex(info, INFO_WIDTH / 2, 3, libtcod.BKGND_NONE, libtcod.CENTER, 'Novice Adventurer')
+    libtcod.console_print_ex(info, INFO_WIDTH / 2, 3, libtcod.BKGND_NONE, libtcod.CENTER, player_race['name'] + ' ' + player_class['name'])
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 5, libtcod.BKGND_NONE, libtcod.CENTER, 'Level: ' + str(player.level))
     libtcod.console_print_ex(info, INFO_WIDTH / 2, 7, libtcod.BKGND_NONE, libtcod.CENTER, '---------------------------')
 
@@ -564,7 +576,7 @@ def render_info_panel(console):
 
 def new_game():
     #Initialize all the components needed to start up a new game
-    global player, map, objects, game_msgs, game_state, inventory, stairs_down, dungeon_level
+    global player, map, objects, game_msgs, game_state, inventory, stairs_down, dungeon_level, player_class, player_race
 
     #Set the dungeon level at one. This will be incremented as the player advances
     dungeon_level = 1
@@ -589,11 +601,39 @@ def new_game():
     #Initialize the players inventory, empty of course. This will be attached to the player object
     inventory = []
 
+    #Let the player decide his race and class
+
+    #Set up the races
+    races = setup_races()
+    classes = setup_classes()
+
+    #Set the background to black while the race and class menus are shown (asthetic only)
+    libtcod.console_set_default_background(0, libtcod.black)
+    libtcod.console_clear(0)
+
+    race_choices = []
+
+    for race in races:
+        race_choices.append(race['name'])
+
+    race_choice = menu('Greetings Wanderer. Tell me a bit about yourself. What race are you?',
+                       race_choices, SCREEN_WIDTH / 2)
+    player_race = races[race_choice]
+
+    class_choices = []
+
+    for player_class in classes:
+        class_choices.append(player_class['name'])
+
+    class_choice = menu('How interesting. And what profession do you follow?',
+                        class_choices, SCREEN_WIDTH / 2)
+    player_class = classes[class_choice]
+
+    #Reset the main conosle to the brass background color
+    libtcod.console_set_default_background(0, libtcod.brass)
+    libtcod.console_clear(0)
     #Create our objects, in this case just a player, then add them to the objects array
-    #Create a fighter component for the player. The player does not need an AI
-    player_death = getattr(Fighter, 'player_death')
-    fighter_component = Fighter(hp=30, attack=2, defence=2, strength=2, protection=0, agility=0, accuracy=0, xp=0,
-                                is_player=True, death_function=player_death)
+    fighter_component = generate_character(player_race, player_class)
     player = Object(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', 'player', libtcod.white, True,
                     fighter=fighter_component, inventory=inventory)
     player.x = player_start_x
@@ -612,6 +652,100 @@ def new_game():
 
     #Add a welcome message
     message('Welcome Stranger! Prepare to perish in the Dungeons of Un-imaginable sorrow!', libtcod.red)
+
+def generate_character(player_race, player_class):
+    #Generate out the stats for the player based on what race and class they chose
+
+    #Generate the players HP - race hit die + class hit die + 10
+    if int(player_class['hit_die']) == 0:
+        hp = random.randint(1, int(player_race['hit_die'])) + 10
+    else:
+        hp = random.randint(1, int(player_race['hit_die'])) + random.randint(1, int(player_class['hit_die'])) + 10
+
+    #Generate the players strength
+    str = int(player_race['str_bonus']) + int(player_class['str_bonus'])
+
+    #Generate the players protection
+    prot = int(player_race['prot_bonus']) + int(player_class['prot_bonus'])
+
+    #Generate the players agility
+    agi = int(player_race['agi_bonus']) + int(player_class['agi_bonus'])
+
+    #Generate the players accuracy
+    acc = int(player_race['acc_bonus']) + int(player_class['acc_bonus'])
+
+    player_death = getattr(Fighter, 'player_death')
+
+    return Fighter(hp=hp, attack=2, defence=2, strength=str, protection=prot, agility=agi, accuracy=acc, xp=0,
+                    is_player=True, death_function=player_death)
+
+
+def setup_races():
+
+    #Load the file containing all the races
+    races_file = 'characterInformation/races.xml'
+    races_lists = [races_file]
+
+    races = []
+
+    index_counter = 0
+
+    for list in races_lists:
+        race_tree = ET.parse(list)
+        race_root = race_tree.getroot()
+
+        #Create a list with all the applicable monsters for this floor
+        for race in race_root.findall('race'):
+            r = {}
+            r['name'] = race.get('name')
+            r['str_bonus'] = race.find('str_bonus').text
+            r['prot_bonus'] = race.find('prot_bonus').text
+            r['agi_bonus'] = race.find('agi_bonus').text
+            r['acc_bonus'] = race.find('acc_bonus').text
+            r['wil_bonus'] = race.find('wil_bonus').text
+            r['int_bonus'] = race.find('int_bonus').text
+            r['hit_die'] = race.find('hit_die').text
+            r['infra'] = race.find('infra').text
+            r['exp_bonus'] = race.find('exp_bonus').text
+
+            #Add the newly created monster list to the list of monsters
+            races.append(r)
+        index_counter += 1
+
+    return races
+
+def setup_classes():
+
+    #Load the file containing all the races
+    classes_file = 'characterInformation/classes.xml'
+    classes_lists = [classes_file]
+
+    classes = []
+
+    index_counter = 0
+
+    for list in classes_lists:
+        classes_tree = ET.parse(list)
+        classes_root = classes_tree.getroot()
+
+        #Create a list with all the applicable monsters for this floor
+        for player_class in classes_root.findall('class'):
+            c = {}
+            c['name'] = player_class.get('name')
+            c['str_bonus'] = player_class.find('str_bonus').text
+            c['prot_bonus'] = player_class.find('prot_bonus').text
+            c['agi_bonus'] = player_class.find('agi_bonus').text
+            c['acc_bonus'] = player_class.find('acc_bonus').text
+            c['wil_bonus'] = player_class.find('wil_bonus').text
+            c['int_bonus'] = player_class.find('int_bonus').text
+            c['hit_die'] = player_class.find('hit_die').text
+
+            #Add the newly created monster list to the list of monsters
+            classes.append(c)
+        index_counter += 1
+
+    return classes
+
 
 def next_level():
     #Advance the player to the next level in the dungeon

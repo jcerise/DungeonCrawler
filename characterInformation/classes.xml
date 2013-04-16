@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<classes>
+    <class name="Fighter">
+        <str_bonus>4</str_bonus>
+        <prot_bonus>2</prot_bonus>
+        <agi_bonus>-2</agi_bonus>
+        <acc_bonus>0</acc_bonus>
+        <wil_bonus>1</wil_bonus>
+        <int_bonus>-2</int_bonus>
+        <hit_die>8</hit_die>
+    </class>
+    <class name="Rogue">
+        <str_bonus>-1</str_bonus>
+        <prot_bonus>3</prot_bonus>
+        <agi_bonus>4</agi_bonus>
+        <acc_bonus>2</acc_bonus>
+        <wil_bonus>2</wil_bonus>
+        <int_bonus>0</int_bonus>
+        <hit_die>4</hit_die>
+    </class>
+    <class name="Mage">
+        <str_bonus>-2</str_bonus>
+        <prot_bonus>-2</prot_bonus>
+        <agi_bonus>0</agi_bonus>
+        <acc_bonus>1</acc_bonus>
+        <wil_bonus>3</wil_bonus>
+        <int_bonus>4</int_bonus>
+        <hit_die>0</hit_die>
+    </class>
+    <class name="Barbarian">
+        <str_bonus>6</str_bonus>
+        <prot_bonus>0</prot_bonus>
+        <agi_bonus>3</agi_bonus>
+        <acc_bonus>-1</acc_bonus>
+        <wil_bonus>0</wil_bonus>
+        <int_bonus>-4</int_bonus>
+        <hit_die>10</hit_die>
+    </class>
+    <class name="Ranger">
+        <str_bonus>1</str_bonus>
+        <prot_bonus>0</prot_bonus>
+        <agi_bonus>2</agi_bonus>
+        <acc_bonus>5</acc_bonus>
+        <wil_bonus>2</wil_bonus>
+        <int_bonus>1</int_bonus>
+        <hit_die>6</hit_die>
+    </class>
+</classes>
